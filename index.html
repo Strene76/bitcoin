@@ -307,10 +307,15 @@
                 type: 'line',
                 data: {
                     datasets: [{
-                        borderColor: '#f7931a',
-                        backgroundColor: 'rgba(247, 147, 26, 0.1)',
-                        borderWidth: 2,
-                        fill: true
+        label: 'Bitcoin (EUR)',
+        data: bitcoinData,
+        borderColor: '#f7931a',
+        backgroundColor: 'rgba(247, 147, 26, 0.1)',
+        borderWidth: 2,
+        fill: true,
+        pointRadius: 0, // Enlève les points
+        pointHoverRadius: 0, // Enlève les points au survol
+        tension: 0.4 // Ajoute une légère courbe pour plus de fluidité
                     }]
                 },
                 options: chartOptions
@@ -320,10 +325,15 @@
                 type: 'line',
                 data: {
                     datasets: [{
-                        borderColor: '#627eea',
-                        backgroundColor: 'rgba(98, 126, 234, 0.1)',
-                        borderWidth: 2,
-                        fill: true
+        label: 'Ethereum (EUR)',
+        data: ethereumData,
+        borderColor: '#627eea',
+        backgroundColor: 'rgba(98, 126, 234, 0.1)',
+        borderWidth: 2,
+        fill: true,
+        pointRadius: 0, // Enlève les points
+        pointHoverRadius: 0, // Enlève les points au survol
+        tension: 0.4 // Ajoute une légère courbe pour plus de fluidité
                     }]
                 },
                 options: chartOptions
