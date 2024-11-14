@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -31,6 +33,9 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            padding: 10px;
+            background-color: #3c3c3e;
+            border-radius: 10px;
         }
 
         .crypto-title {
@@ -50,10 +55,19 @@
 
         .price-change {
             font-size: 16px;
+            padding: 4px 8px;
+            border-radius: 4px;
         }
 
-        .positive { color: #4caf50; }
-        .negative { color: #f44336; }
+        .positive { 
+            color: #4caf50;
+            background-color: rgba(76, 175, 80, 0.1);
+        }
+
+        .negative { 
+            color: #f44336;
+            background-color: rgba(244, 67, 54, 0.1);
+        }
 
         .time-filters {
             display: flex;
@@ -69,7 +83,7 @@
             cursor: pointer;
             background: #3c3c3e;
             color: white;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
         }
 
         .time-filter:hover {
@@ -78,11 +92,15 @@
 
         .time-filter.active {
             background-color: #0066cc;
+            box-shadow: 0 2px 4px rgba(0, 102, 204, 0.3);
         }
 
         .chart-container {
-            height: 400px;
             position: relative;
+            height: 400px;
+            background-color: #3c3c3e;
+            border-radius: 10px;
+            padding: 20px;
         }
 
         .loading {
@@ -90,14 +108,19 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: #ffffff;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1000;
+        }
+
+        .error-message {
+            color: #f44336;
+            text-align: center;
+            margin: 20px 0;
         }
 
         @media (max-width: 768px) {
-            .time-filters {
-                justify-content: center;
-            }
-            
             .crypto-header {
                 flex-direction: column;
                 text-align: center;
@@ -106,6 +129,15 @@
             .price-info {
                 text-align: center;
                 margin-top: 10px;
+            }
+
+            .time-filters {
+                justify-content: center;
+            }
+
+            .time-filter {
+                padding: 6px 12px;
+                font-size: 14px;
             }
         }
     </style>
@@ -123,18 +155,16 @@
             </div>
 
             <div class="time-filters" id="btc-filters">
-                <button class="time-filter active" data-days="1">1J</button>
-                <button class="time-filter" data-days="7">1S</button>
-                <button class="time-filter" data-days="30">1M</button>
-                <button class="time-filter" data-days="180">6M</button>
-                <button class="time-filter" data-days="365">1A</button>
-                <button class="time-filter" data-days="1825">5A</button>
-                <button class="time-filter" data-days="max">Max</button>
+                <button class="time-filter active" data-interval="1h">1J</button>
+                <button class="time-filter" data-interval="4h">1S</button>
+                <button class="time-filter" data-interval="1d">1M</button>
+                <button class="time-filter" data-interval="1w">6M</button>
+                <button class="time-filter" data-interval="1M">1A</button>
             </div>
 
             <div class="chart-container">
                 <canvas id="btcChart"></canvas>
-                <div class="loading" id="btc-loading">Chargement des données...</div>
+                <div class="loading" id="btc-loading">Chargement...</div>
             </div>
         </div>
 
@@ -149,51 +179,45 @@
             </div>
 
             <div class="time-filters" id="eth-filters">
-                <button class="time-filter active" data-days="1">1J</button>
-                <button class="time-filter" data-days="7">1S</button>
-                <button class="time-filter" data-days="30">1M</button>
-                <button class="time-filter" data-days="180">6M</button>
-                <button class="time-filter" data-days="365">1A</button>
-                <button class="time-filter" data-days="1825">5A</button>
-                <button class="time-filter" data-days="max">Max</button>
+                <button class="time-filter active" data-interval="1h">1J</button>
+                <button class="time-filter" data-interval="4h">1S</button>
+                <button class="time-filter" data-interval="1d">1M</button>
+                <button class="time-filter" data-interval="1w">6M</button>
+                <button class="time-filter" data-interval="1M">1A</button>
             </div>
 
             <div class="chart-container">
                 <canvas id="ethChart"></canvas>
-                <div class="loading" id="eth-loading">Chargement des données...</div>
+                <div class="loading" id="eth-loading">Chargement...</div>
             </div>
         </div>
     </div>
 
     <script>
         const CRYPTO_CONFIG = {
-            bitcoin: {
+            BTCEUR: {
                 id: 'btc',
                 color: '#f7931a',
                 chart: null
             },
-            ethereum: {
+            ETHEUR: {
                 id: 'eth',
                 color: '#627eea',
                 chart: null
             }
         };
 
-        async function fetchCryptoData(crypto, days) {
+        async function fetchCryptoData(symbol, interval) {
             try {
-                const response = await fetch(
-                    `https://api.coingecko.com/api/v3/coins/${crypto}/market_chart?vs_currency=eur&days=${days}`,
-                    { headers: { 'Accept': 'application/json' } }
-                );
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
+                const response = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=500`);
+                if (!response.ok) throw new Error('Erreur réseau');
                 const data = await response.json();
-                return data.prices;
+                return data.map(item => ({
+                    time: item[0],
+                    price: parseFloat(item[4])
+                }));
             } catch (error) {
-                console.error(`Erreur lors de la récupération des données pour ${crypto}:`, error);
+                console.error('Erreur:', error);
                 throw error;
             }
         }
@@ -209,17 +233,17 @@
                 type: 'line',
                 data: {
                     datasets: [{
-                        label: `Prix (EUR)`,
+                        label: 'Prix (EUR)',
                         data: data.map(item => ({
-                            x: new Date(item[0]),
-                            y: item[1]
+                            x: new Date(item.time),
+                            y: item.price
                         })),
                         borderColor: cryptoConfig.color,
-                        backgroundColor: cryptoConfig.color + '20',
+                        backgroundColor: `${cryptoConfig.color}20`,
                         borderWidth: 2,
                         pointRadius: 0,
-                        fill: true,
-                        tension: 0.4
+                        tension: 0.4,
+                        fill: true
                     }]
                 },
                 options: {
@@ -233,7 +257,7 @@
                         x: {
                             type: 'time',
                             time: {
-                                unit: 'day'
+                                unit: 'hour'
                             },
                             grid: {
                                 color: 'rgba(255, 255, 255, 0.1)'
@@ -269,34 +293,30 @@
             });
         }
 
-        function updatePriceDisplay(cryptoId, currentPrice, priceChange) {
-            document.getElementById(`${cryptoId}-price`).textContent = 
-                '€' + currentPrice.toLocaleString('fr-FR', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                });
-
-            const changeElement = document.getElementById(`${cryptoId}-change`);
-            changeElement.textContent = `${priceChange >= 0 ? '+' : ''}${priceChange.toFixed(2)}% (24h)`;
-            changeElement.className = `price-change ${priceChange >= 0 ? 'positive' : 'negative'}`;
-        }
-
-        async function updateCrypto(cryptoName, days) {
-            const cryptoConfig = CRYPTO_CONFIG[cryptoName];
+        async function updateCrypto(symbol, interval) {
+            const cryptoConfig = CRYPTO_CONFIG[symbol];
             const loadingElement = document.getElementById(`${cryptoConfig.id}-loading`);
             
             try {
                 loadingElement.style.display = 'block';
-                const data = await fetchCryptoData(cryptoName, days);
+                const data = await fetchCryptoData(symbol, interval);
                 
                 if (data && data.length > 0) {
                     createChart(cryptoConfig, data);
                     
-                    const currentPrice = data[data.length - 1][1];
-                    const previousPrice = data[data.length - 2][1];
+                    const currentPrice = data[data.length - 1].price;
+                    const previousPrice = data[data.length - 2].price;
                     const priceChange = ((currentPrice - previousPrice) / previousPrice) * 100;
                     
-                    updatePriceDisplay(cryptoConfig.id, currentPrice, priceChange);
+                    document.getElementById(`${cryptoConfig.id}-price`).textContent = 
+                        '€' + currentPrice.toLocaleString('fr-FR', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        });
+
+                    const changeElement = document.getElementById(`${cryptoConfig.id}-change`);
+                    changeElement.textContent = `${priceChange >= 0 ? '+' : ''}${priceChange.toFixed(2)}%`;
+                    changeElement.className = `price-change ${priceChange >= 0 ? 'positive' : 'negative'}`;
                 }
             } catch (error) {
                 document.getElementById(`${cryptoConfig.id}-price`).textContent = "Erreur de chargement";
@@ -305,35 +325,35 @@
             }
         }
 
-        function initializeCrypto(cryptoName) {
-            const cryptoConfig = CRYPTO_CONFIG[cryptoName];
+        function initializeCrypto(symbol) {
+            const cryptoConfig = CRYPTO_CONFIG[symbol];
             const filters = document.getElementById(`${cryptoConfig.id}-filters`);
             
             filters.addEventListener('click', async (e) => {
                 if (e.target.classList.contains('time-filter')) {
                     filters.querySelectorAll('.time-filter').forEach(btn => btn.classList.remove('active'));
                     e.target.classList.add('active');
-                    await updateCrypto(cryptoName, e.target.dataset.days);
+                    await updateCrypto(symbol, e.target.dataset.interval);
                 }
             });
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            initializeCrypto('bitcoin');
-            initializeCrypto('ethereum');
+            initializeCrypto('BTCEUR');
+            initializeCrypto('ETHEUR');
 
             // Chargement initial
-            await updateCrypto('bitcoin', '1');
-            await updateCrypto('ethereum', '1');
+            await updateCrypto('BTCEUR', '1h');
+            await updateCrypto('ETHEUR', '1h');
 
-            // Mise à jour automatique toutes les 5 minutes
+            // Mise à jour automatique toutes les minutes
             setInterval(async () => {
-                for (const cryptoName in CRYPTO_CONFIG) {
-                    const cryptoConfig = CRYPTO_CONFIG[cryptoName];
-                    const activeDays = document.querySelector(`#${cryptoConfig.id}-filters .active`).dataset.days;
-                    await updateCrypto(cryptoName, activeDays);
+                for (const symbol in CRYPTO_CONFIG) {
+                    const cryptoConfig = CRYPTO_CONFIG[symbol];
+                    const activeInterval = document.querySelector(`#${cryptoConfig.id}-filters .active`).dataset.interval;
+                    await updateCrypto(symbol, activeInterval);
                 }
-            }, 300000);
+            }, 60000);
         });
     </script>
 </body>
