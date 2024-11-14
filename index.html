@@ -51,6 +51,7 @@
             border-radius: 10px;
             border: none;
             font-size: 1rem;
+            transition: all 0.3s ease;
         }
 
         select {
@@ -69,7 +70,6 @@
             color: white;
             cursor: pointer;
             font-weight: bold;
-            transition: all 0.3s ease;
         }
 
         button:hover {
@@ -131,10 +131,12 @@
             height: 400px;
         }
 
-        .loading {
-            text-align: center;
-            color: #fff;
-            padding: 1rem;
+        .bitcoin-chart {
+            border: 1px solid rgba(247, 147, 26, 0.3);
+        }
+
+        .ethereum-chart {
+            border: 1px solid rgba(98, 126, 234, 0.3);
         }
 
         @media (min-width: 1024px) {
@@ -145,6 +147,12 @@
                 height: 500px;
             }
         }
+
+        .loading {
+            text-align: center;
+            color: #fff;
+            padding: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -152,12 +160,14 @@
         <h1>Évolution Bitcoin & Ethereum</h1>
         <div class="controls">
             <select id="timeframe">
+                <option value="1d">1 Jour</option>
+                <option value="7d">1 Semaine</option>
                 <option value="1">1 Mois</option>
                 <option value="3">3 Mois</option>
                 <option value="6">6 Mois</option>
                 <option value="12">1 An</option>
                 <option value="60">5 Ans</option>
-                <option value="max" selected>Depuis la création</option>
+                <option value="max">Depuis la création</option>
             </select>
             <button onclick="updateCharts()">Actualiser</button>
         </div>
@@ -204,8 +214,11 @@
                 x: {
                     type: 'time',
                     time: {
-                        unit: 'month',
+                        unit: 'auto',
                         displayFormats: {
+                            hour: 'HH:mm',
+                            day: 'DD/MM',
+                            week: 'DD/MM',
                             month: 'MMM YYYY'
                         }
                     },
@@ -252,14 +265,26 @@
 
         async function fetchHistoricalData(crypto, timeframe) {
             try {
-                let endpoint;
-                if (timeframe === 'max') {
-                    endpoint = `https://api.coingecko.com/api/v3/coins/${crypto}/market_chart?vs_currency=eur&days=max&interval=daily`;
-                } else {
-                    const days = timeframe * 30;
-                    endpoint = `https://api.coingecko.com/api/v3/coins/${crypto}/market_chart?vs_currency=eur&days=${days}&interval=daily`;
-                }
+                let days;
+                let interval = 'daily';
                 
+                switch(timeframe) {
+                    case '1d':
+                        days = 1;
+                        interval = 'hourly';
+                        break;
+                    case '7d':
+                        days = 7;
+                        interval = 'hourly';
+                        break;
+                    case 'max':
+                        days = 'max';
+                        break;
+                    default:
+                        days = timeframe * 30;
+                }
+
+                const endpoint = `https://api.coingecko.com/api/v3/coins/${crypto}/market_chart?vs_currency=eur&days=${days}&interval=${interval}`;
                 const response = await fetch(endpoint);
                 if (!response.ok) throw new Error('Erreur réseau');
                 const data = await response.json();
@@ -272,6 +297,18 @@
                 console.error('Erreur:', error);
                 return [];
             }
+        }
+
+        function updateChartDisplay(timeframe) {
+            let unit = 'month';
+            if (timeframe === '1d') {
+                unit = 'hour';
+            } else if (timeframe === '7d') {
+                unit = 'day';
+            }
+            
+            bitcoinChart.options.scales.x.time.unit = unit;
+            ethereumChart.options.scales.x.time.unit = unit;
         }
 
         async function initCharts() {
@@ -339,6 +376,8 @@
             const timeframe = document.getElementById('timeframe').value;
             const bitcoinData = await fetchHistoricalData('bitcoin', timeframe);
             const ethereumData = await fetchHistoricalData('ethereum', timeframe);
+
+            updateChartDisplay(timeframe);
 
             bitcoinChart.data.datasets[0].data = bitcoinData;
             ethereumChart.data.datasets[0].data = ethereumData;
