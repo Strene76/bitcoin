@@ -82,6 +82,7 @@
             border-radius: 10px;
             padding: 20px;
             margin-bottom: 20px;
+            height: 400px;
         }
 
         .theme-toggle {
@@ -112,12 +113,12 @@
         <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
         
         <div class="price-card">
-            <div class="current-price">€87,810.78</div>
-            <div class="price-change positive">+1.01% (24h)</div>
+            <div class="current-price">Chargement...</div>
+            <div class="price-change">...</div>
         </div>
 
         <div class="time-filters">
-            <button class="time-filter" onclick="updateTimeframe('1D')">1J</button>
+            <button class="time-filter active" onclick="updateTimeframe('1D')">1J</button>
             <button class="time-filter" onclick="updateTimeframe('1W')">1S</button>
             <button class="time-filter" onclick="updateTimeframe('1M')">1M</button>
             <button class="time-filter" onclick="updateTimeframe('6M')">6M</button>
@@ -132,29 +133,103 @@
     </div>
 
     <script>
+        let chart;
+        let currentTimeframe = '1D';
+
+        // Fonction pour formater les dates
+        function formatDate(date) {
+            return new Date(date).toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
         // Initialisation du graphique
-        const ctx = document.getElementById('bitcoinChart').getContext('2d');
-        const chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [{
-                    label: 'Prix Bitcoin (EUR)',
-                    data: [],
-                    borderColor: '#1e88e5',
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
+        function initChart() {
+            const ctx = document.getElementById('bitcoinChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Prix Bitcoin (EUR)',
+                        data: [],
+                        borderColor: '#1e88e5',
+                        tension: 0.4,
+                        pointRadius: 2,
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: true,
+                                color: 'rgba(0,0,0,0.1)'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                display: true,
+                                color: 'rgba(0,0,0,0.1)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '€' + value.toLocaleString('fr-FR');
+                                }
+                            }
+                        }
                     }
                 }
+            });
+        }
+
+        // Fonction pour mettre à jour les données du graphique
+        async function updateChartData(timeframe) {
+            try {
+                const response = await fetch(`https://api.binance.com/api/v3/klines?symbol=BTCEUR&interval=1h&limit=168`);
+                const data = await response.json();
+                
+                const prices = data.map(item => ({
+                    time: item[0],
+                    price: parseFloat(item[4])
+                }));
+
+                chart.data.labels = prices.map(item => formatDate(item.time));
+                chart.data.datasets[0].data = prices.map(item => item.price);
+                chart.update();
+
+                // Mise à jour du prix actuel
+                const currentPrice = prices[prices.length - 1].price;
+                const previousPrice = prices[prices.length - 2].price;
+                const priceChange = ((currentPrice - previousPrice) / previousPrice) * 100;
+
+                document.querySelector('.current-price').textContent = 
+                    '€' + currentPrice.toLocaleString('fr-FR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+
+                const priceChangeElement = document.querySelector('.price-change');
+                priceChangeElement.textContent = `${priceChange >= 0 ? '+' : ''}${priceChange.toFixed(2)}% (24h)`;
+                priceChangeElement.className = `price-change ${priceChange >= 0 ? 'positive' : 'negative'}`;
+
+            } catch (error) {
+                console.error('Erreur lors de la récupération des données:', error);
             }
-        });
+        }
 
         // Fonction pour basculer le thème
         function toggleTheme() {
@@ -169,21 +244,20 @@
                 btn.classList.remove('active');
             });
             event.target.classList.add('active');
-            // Ici, vous pouvez ajouter la logique pour mettre à jour les données du graphique
+            currentTimeframe = timeframe;
+            updateChartData(timeframe);
         }
 
-        // Mise à jour en temps réel (toutes les 30 secondes)
-        setInterval(() => {
-            fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCEUR')
-                .then(response => response.json())
-                .then(data => {
-                    document.querySelector('.current-price').textContent = 
-                        '€' + parseFloat(data.price).toLocaleString('fr-FR', {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2
-                        });
-                });
-        }, 30000);
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            initChart();
+            updateChartData('1D');
+            
+            // Mise à jour automatique toutes les 30 secondes
+            setInterval(() => {
+                updateChartData(currentTimeframe);
+            }, 30000);
+        });
     </script>
 </body>
 </html>
