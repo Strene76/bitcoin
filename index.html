@@ -1,21 +1,56 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Application Fitness</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .workout-item {
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>App Fitness</h1>
+        
+        <h2>Enregistrer une séance</h2>
+        <div class="input-section">
+            <label for="pushups">Pompes :</label>
+            <input type="number" id="pushups" value="0">
+            <br><br>
+            <label for="plank">Gainage (secondes) :</label>
+            <input type="number" id="plank" value="0">
+            <br><br>
+            <button id="saveBtn">Sauvegarder la séance</button>
+        </div>
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyContOlBfeRDvVSiZFcscq1hI8v8822wzU",
-  authDomain: "app-fitness-f69e4.firebaseapp.com",
-  projectId: "app-fitness-f69e4",
-  storageBucket: "app-fitness-f69e4.firebasestorage.app",
-  messagingSenderId: "971340344364",
-  appId: "1:971340344364:web:65204b3602c3ec0eb67589",
-  measurementId: "G-QN6ET0VKZG"
-};
+        <hr>
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+        <h2>Historique</h2>
+        <div id="historyList">
+            </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script>
+        // Votre code JavaScript sera copié ici.
+    </script>
+</body>
+</html>
