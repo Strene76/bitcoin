@@ -1,1 +1,68 @@
+/* style.css */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f7fafc;
+    color: #2d3748;
+}
 
+.app-container {
+    max-width: 448px; /* max-w-md */
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #f7fafc;
+    min-height: 100vh;
+}
+
+header {
+    background-image: linear-gradient(to right, #4c51bf, #6b46c1); /* from-blue-600 to-purple-600 */
+    color: white;
+    padding: 24px;
+    text-align: center;
+}
+
+header h1 {
+    font-size: 1.5rem; /* text-2xl */
+    font-weight: bold;
+    margin: 0;
+}
+
+header p {
+    color: rgba(226, 232, 240, 0.9); /* text-blue-100 */
+    margin-top: 8px;
+}
+
+nav {
+    background-color: white;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+}
+
+nav button {
+    flex: 1;
+    padding: 16px;
+    text-align: center;
+    font-weight: 500;
+    color: #718096;
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: color 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+nav button:hover {
+    color: #4a5568;
+}
+
+nav button.active {
+    color: #3182ce;
+    border-bottom: 2px solid #3182ce;
+    background-color: #ebf8ff;
+}
+
+/* Vous devrez ajouter les styles pour le reste des éléments (compteurs, historique, etc.) */
