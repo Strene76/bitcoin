@@ -439,16 +439,17 @@
     </div>
 
     <!-- Firebase Setup Info -->
-    const firebaseConfig = {
-  apiKey: "AIzaSyContOlBfeRDvVSiZFcscq1hI8v8822wzU",
-  authDomain: "app-fitness-f69e4.firebaseapp.com",
-  databaseURL: "https://app-fitness-f69e4-default-rtdb.firebaseio.com",
-  projectId: "app-fitness-f69e4",
-  storageBucket: "app-fitness-f69e4.firebasestorage.app",
-  messagingSenderId: "971340344364",
-  appId: "1:971340344364:web:aaa8a67114e061a0b67589",
-  measurementId: "G-59KBVB01FQ"
-};
+    <div class="firebase-setup" id="firebaseSetup">
+        <h3>🔥 Configuration Firebase</h3>
+        <p>Pour activer la sauvegarde cloud :</p>
+        <p>1. Créez un projet sur <code>console.firebase.google.com</code></p>
+        <p>2. Activez Firestore Database</p>
+        <p>3. Remplacez les clés dans le code JavaScript</p>
+        <p>4. Rechargez l'application</p>
+        <button class="btn-mobile btn-primary-mobile" onclick="hideFirebaseSetup()" style="margin-top: 15px; width: 100%;">
+            ✓ Compris, continuer en local
+        </button>
+    </div>
 
     <!-- Planning Container -->
     <div class="planning-container">
@@ -493,6 +494,7 @@
             constructor() {
                 this.persons = [];
                 this.planning = {};
+                this.lastUpdate = '';
                 this.holidays = [
                     { id: 'jan1', name: '1 JAN', desc: 'Jour de l\'An' },
                     { id: 'paques', name: '21 AVR', desc: 'Lundi Pâques' },
@@ -507,45 +509,139 @@
                     { id: 'dec25', name: '25 DÉC', desc: 'Noël' }
                 ];
                 
-                this.loadData();
+                // Initialisation avec Firebase
+                setTimeout(() => {
+                    this.loadData();
+                    this.setupRealtimeSync();
+                }, 1000); // Attendre que Firebase soit chargé
+                
                 this.updateDisplay();
             }
 
+            async saveToFirebase() {
+                if (window.firebaseEnabled && window.firebaseDB) {
+                    try {
+                        const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js');
+                        
+                        const planningDoc = doc(window.firebaseDB, 'astreintes', 'planning-2025');
+                        const timestamp = new Date().toISOString();
+                        
+                        await setDoc(planningDoc, {
+                            persons: this.persons,
+                            planning: this.planning,
+                            lastUpdate: timestamp,
+                            device: 'S24-Ultra',
+                            version: '1.0'
+                        });
+                        
+                        this.lastUpdate = timestamp;
+                        document.getElementById('syncStatus').textContent = 'Synchronisé ☁️';
+                        console.log('✅ Sauvegardé sur Firebase');
+                        
+                    } catch (error) {
+                        console.error('❌ Erreur Firebase:', error);
+                        document.getElementById('syncStatus').textContent = 'Erreur sync ⚠️';
+                        this.showToast('❌ Erreur synchronisation');
+                    }
+                }
+            }
+
+            async loadFromFirebase() {
+                if (window.firebaseEnabled && window.firebaseDB) {
+                    try {
+                        const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js');
+                        
+                        const planningDoc = doc(window.firebaseDB, 'astreintes', 'planning-2025');
+                        const docSnap = await getDoc(planningDoc);
+                        
+                        if (docSnap.exists()) {
+                            const data = docSnap.data();
+                            this.persons = data.persons || [];
+                            this.planning = data.planning || {};
+                            this.lastUpdate = data.lastUpdate || '';
+                            this.updateDisplay();
+                            this.showToast('📥 Données chargées depuis Firebase');
+                            console.log('📥 Chargé depuis Firebase:', data);
+                        } else {
+                            console.log('📄 Aucune donnée Firebase trouvée, nouveau planning');
+                        }
+                    } catch (error) {
+                        console.error('❌ Erreur chargement Firebase:', error);
+                        // Fallback sur sauvegarde locale
+                        this.loadLocalData();
+                    }
+                } else {
+                    this.loadLocalData();
+                }
+            }
+
+            async setupRealtimeSync() {
+                if (window.firebaseEnabled && window.firebaseDB) {
+                    try {
+                        const { doc, onSnapshot } = await import('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js');
+                        
+                        const planningDoc = doc(window.firebaseDB, 'astreintes', 'planning-2025');
+                        
+                        onSnapshot(planningDoc, (doc) => {
+                            if (doc.exists()) {
+                                const data = doc.data();
+                                
+                                // Éviter la boucle de synchronisation
+                                if (data.lastUpdate && data.lastUpdate !== this.lastUpdate) {
+                                    this.persons = data.persons || [];
+                                    this.planning = data.planning || {};
+                                    this.lastUpdate = data.lastUpdate;
+                                    this.updateDisplay();
+                                    this.showToast('🔄 Planning mis à jour en temps réel');
+                                    console.log('🔄 Sync temps réel:', data);
+                                }
+                            }
+                        });
+                        
+                        console.log('🔄 Synchronisation temps réel activée');
+                        document.getElementById('syncStatus').textContent = 'Sync temps réel ☁️';
+                        
+                    } catch (error) {
+                        console.error('❌ Erreur sync temps réel:', error);
+                    }
+                }
+            }
+
+            loadLocalData() {
+                try {
+                    if (window.planningData) {
+                        this.persons = window.planningData.persons || [];
+                        this.planning = window.planningData.planning || {};
+                        this.lastUpdate = window.planningData.lastUpdate || '';
+                    }
+                } catch (error) {
+                    console.error('Erreur chargement local:', error);
+                    this.persons = [];
+                    this.planning = {};
+                }
+            }
+
             saveData() {
+                // Sauvegarde locale d'abord
                 const data = {
                     persons: this.persons,
                     planning: this.planning,
                     lastUpdate: new Date().toISOString()
                 };
                 
-                // Sauvegarde locale dans le navigateur
                 try {
-                    const dataString = JSON.stringify(data);
                     window.planningData = data;
-                    
-                    // Simulation d'une API de sauvegarde
-                    console.log('💾 Données sauvegardées:', data);
-                    
-                    // Ici vous pourrez ajouter l'appel Firebase plus tard
-                    // this.saveToFirebase(data);
-                    
+                    console.log('💾 Sauvegarde locale OK');
                 } catch (error) {
-                    console.error('Erreur de sauvegarde:', error);
-                    this.showToast('❌ Erreur de sauvegarde');
+                    console.error('Erreur sauvegarde locale:', error);
                 }
+                
+                // Puis Firebase si disponible
+                this.saveToFirebase();
             }
 
-            loadData() {
-                try {
-                    if (window.planningData) {
-                        this.persons = window.planningData.persons || [];
-                        this.planning = window.planningData.planning || {};
-                    }
-                } catch (error) {
-                    console.error('Erreur de chargement:', error);
-                    this.persons = [];
-                    this.planning = {};
-                }
+            async loadData() {
+                await this.loadFromFirebase();
             }
 
             addPerson(name) {
@@ -912,97 +1008,48 @@
         console.log('💡 Pour Firebase: remplacez les clés dans le code et décommentez les fonctions Firebase');
     </script>
 
-    <!-- Instructions Firebase pour GitHub/Déploiement -->
+    <!-- Firebase Configuration Active -->
     <script type="module">
-        /*
-        CONFIGURATION FIREBASE POUR DÉPLOIEMENT GITHUB/FIREBASE:
-        
-        1. Créez un projet Firebase:
-           - Allez sur https://console.firebase.google.com
-           - Créez un nouveau projet
-           - Activez Firestore Database
-        
-        2. Obtenez vos clés de configuration:
-           - Dans Paramètres du projet > Applications Web
-           - Copiez la config Firebase
-        
-        3. Remplacez cette section par vos vraies clés:
-        
+        // Import Firebase modules
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
         import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
         
+        // Configuration Firebase - VOS VRAIES CLÉS
         const firebaseConfig = {
-            apiKey: "VOTRE_VRAIE_API_KEY",
-            authDomain: "votre-projet.firebaseapp.com",
-            projectId: "votre-projet-id",
-            storageBucket: "votre-projet.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "votre-app-id"
+            apiKey: "AIzaSyContOlBfeRDvVSiZFcscq1hI8v8822wzU",
+            authDomain: "app-fitness-f69e4.firebaseapp.com",
+            databaseURL: "https://app-fitness-f69e4-default-rtdb.firebaseio.com",
+            projectId: "app-fitness-f69e4",
+            storageBucket: "app-fitness-f69e4.firebasestorage.app",
+            messagingSenderId: "971340344364",
+            appId: "1:971340344364:web:aaa8a67114e061a0b67589",
+            measurementId: "G-59KBVB01FQ"
         };
-        
+
+        // Initialiser Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        // Ajouter ces méthodes à la classe AstreintesPlanningMobile:
-        
-        async saveToFirebase() {
-            try {
-                const planningDoc = doc(db, 'astreintes', 'planning-2025');
-                await setDoc(planningDoc, {
-                    persons: this.persons,
-                    planning: this.planning,
-                    lastUpdate: new Date().toISOString(),
-                    device: 'S24-Ultra'
-                });
-                document.getElementById('syncStatus').textContent = 'Synchronisé ☁️';
-                this.showToast('☁️ Sauvé sur Firebase');
-            } catch (error) {
-                console.error('Erreur Firebase:', error);
-                document.getElementById('syncStatus').textContent = 'Erreur sync ⚠️';
-            }
+        // Rendre disponible globalement
+        window.firebaseDB = db;
+        window.firebaseApp = app;
+        window.firebaseEnabled = true;
+
+        console.log('🔥 Firebase initialisé avec succès !');
+        document.getElementById('syncStatus').textContent = 'Firebase connecté ☁️';
+
+        // Mise à jour du statut dans l'interface
+        const setupSection = document.getElementById('firebaseSetup');
+        if (setupSection) {
+            setupSection.innerHTML = `
+                <h3 style="color: #10b981;">✅ Firebase Connecté</h3>
+                <p style="color: #10b981;">Sauvegarde cloud active sur votre projet app-fitness-f69e4</p>
+                <p style="font-size: 0.8rem; color: #64748b;">Synchronisation automatique en temps réel</p>
+                <button class="btn-mobile btn-success-mobile" onclick="hideFirebaseSetup()" style="margin-top: 15px; width: 100%;">
+                    ✓ Parfait !
+                </button>
+            `;
         }
-        
-        async loadFromFirebase() {
-            try {
-                const planningDoc = doc(db, 'astreintes', 'planning-2025');
-                const docSnap = await getDoc(planningDoc);
-                
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    this.persons = data.persons || [];
-                    this.planning = data.planning || {};
-                    this.updateDisplay();
-                    this.showToast('📥 Données chargées depuis Firebase');
-                }
-            } catch (error) {
-                console.error('Erreur chargement:', error);
-            }
-        }
-        
-        setupRealtimeSync() {
-            const planningDoc = doc(db, 'astreintes', 'planning-2025');
-            onSnapshot(planningDoc, (doc) => {
-                if (doc.exists()) {
-                    const data = doc.data();
-                    if (data.lastUpdate !== this.lastUpdate) {
-                        this.persons = data.persons || [];
-                        this.planning = data.planning || {};
-                        this.updateDisplay();
-                        this.showToast('🔄 Planning mis à jour');
-                    }
-                }
-            });
-        }
-        
-        4. Décommentez l'appel dans saveData():
-           this.saveToFirebase();
-        
-        5. Ajoutez dans le constructeur:
-           this.loadFromFirebase();
-           this.setupRealtimeSync();
-        
-        6. Déployez sur GitHub Pages ou Firebase Hosting
-        */
     </script>
 </body>
 </html>
