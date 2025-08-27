@@ -2,177 +2,190 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Planning Astreintes Mobile</title>
-    <meta name="theme-color" content="#6366f1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planning Astreintes</title>
     
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            overflow-x: hidden;
-            padding-bottom: 80px;
+            padding: 20px;
         }
 
-        .mobile-header {
-            background: linear-gradient(135deg, #8b5fbf 0%, #6366f1 100%);
-            padding: 20px 16px 25px;
-            color: white;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
             text-align: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
         }
 
-        .mobile-header h1 {
-            font-size: 1.6rem;
+        .header h1 {
+            color: #374151;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
             font-weight: 600;
-            margin-bottom: 5px;
         }
 
-        .sync-status {
-            font-size: 0.8rem;
-            opacity: 0.9;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
+        .header p {
+            color: #64748b;
+            font-size: 1.1rem;
         }
 
-        .sync-indicator {
-            width: 8px;
-            height: 8px;
-            background: #10b981;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .stats-mobile {
+        .stats-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            padding: 16px;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #6366f1;
             margin-bottom: 10px;
         }
 
-        .stat-card-mobile {
-            background: white;
-            padding: 20px 15px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        .stat-number-mobile {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #6366f1;
-            margin-bottom: 5px;
-        }
-
-        .stat-label-mobile {
+        .stat-label {
             color: #64748b;
-            font-size: 0.75rem;
+            font-size: 1rem;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
-        .mobile-actions {
-            padding: 0 16px 20px;
+        .actions {
             display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
         }
 
-        .btn-mobile {
-            flex: 1;
-            min-width: 120px;
-            padding: 14px 16px;
+        .btn {
+            padding: 12px 24px;
             border: none;
-            border-radius: 12px;
+            border-radius: 10px;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            gap: 8px;
         }
 
-        .btn-primary-mobile {
+        .btn-primary {
             background: #6366f1;
             color: white;
         }
 
-        .btn-success-mobile {
+        .btn-success {
             background: #10b981;
             color: white;
         }
 
-        .btn-warning-mobile {
-            background: #f59e0b;
-            color: white;
-        }
-
-        .btn-mobile:active {
-            transform: scale(0.95);
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
 
         .planning-container {
-            margin: 0 16px;
             background: white;
             border-radius: 15px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.1);
             overflow: hidden;
         }
 
-        .person-card {
+        .planning-header {
+            background: #f8fafc;
+            padding: 20px 30px;
             border-bottom: 1px solid #e5e7eb;
-            padding: 15px;
         }
 
-        .person-card:last-child {
-            border-bottom: none;
+        .planning-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 10px;
         }
 
-        .person-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
+        .holidays-header {
+            display: grid;
+            grid-template-columns: 200px repeat(11, 1fr);
+            gap: 10px;
+            padding: 0 30px 20px;
+            margin-top: 20px;
         }
 
-        .person-name {
-            font-size: 1.1rem;
+        .person-column {
             font-weight: 600;
             color: #374151;
         }
 
-        .person-total {
+        .holiday-header {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .holiday-name {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .holiday-desc {
+            opacity: 0.8;
+        }
+
+        .person-row {
+            display: grid;
+            grid-template-columns: 200px repeat(11, 1fr);
+            gap: 10px;
+            padding: 15px 30px;
+            border-bottom: 1px solid #f1f5f9;
+            align-items: center;
+        }
+
+        .person-row:last-child {
+            border-bottom: none;
+        }
+
+        .person-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .person-name {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .person-count {
             background: #f59e0b;
             color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.9rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
             font-weight: 600;
         }
 
@@ -181,41 +194,26 @@
             color: white;
             border: none;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 24px;
+            height: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 1rem;
-        }
-
-        .holidays-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-        }
-
-        .holiday-item {
-            text-align: center;
-        }
-
-        .holiday-date {
-            font-size: 0.7rem;
-            color: #64748b;
-            margin-bottom: 5px;
-            font-weight: 500;
+            font-size: 0.9rem;
+            margin-left: 10px;
         }
 
         .status-btn {
-            width: 100%;
-            height: 50px;
+            width: 50px;
+            height: 35px;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.2s ease;
-            font-size: 1.1rem;
+            font-size: 0.9rem;
+            justify-self: center;
         }
 
         .status-undefined {
@@ -236,32 +234,22 @@
             border: 2px solid #dc2626;
         }
 
-        .status-btn:active {
-            transform: scale(0.95);
+        .status-btn:hover {
+            transform: scale(1.05);
         }
 
-        .fab {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            background: #6366f1;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            font-size: 1.5rem;
-            cursor: pointer;
-            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
-            transition: all 0.3s ease;
-            z-index: 200;
+        .no-persons {
+            text-align: center;
+            padding: 60px;
+            color: #64748b;
         }
 
-        .fab:active {
-            transform: scale(0.9);
+        .no-persons-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
         }
 
-        .modal-mobile {
+        .modal {
             display: none;
             position: fixed;
             top: 0;
@@ -270,219 +258,175 @@
             height: 100%;
             background: rgba(0,0,0,0.7);
             z-index: 1000;
-            animation: fadeIn 0.3s ease;
         }
 
-        .modal-content-mobile {
+        .modal-content {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             background: white;
-            border-radius: 20px 20px 0 0;
-            padding: 30px 20px;
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-
-        .modal-header {
-            text-align: center;
-            margin-bottom: 25px;
+            padding: 40px;
+            border-radius: 15px;
+            min-width: 400px;
         }
 
         .modal-title {
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             font-weight: 600;
             color: #374151;
+            margin-bottom: 25px;
+            text-align: center;
         }
 
-        .form-group-mobile {
+        .form-group {
             margin-bottom: 20px;
         }
 
-        .form-group-mobile label {
+        .form-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
             color: #374151;
         }
 
-        .form-group-mobile input {
+        .form-group input {
             width: 100%;
-            padding: 15px;
+            padding: 12px 15px;
             border: 2px solid #e5e7eb;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 1rem;
-            background: #f9fafb;
         }
 
-        .form-group-mobile input:focus {
+        .form-group input:focus {
             outline: none;
             border-color: #6366f1;
-            background: white;
         }
 
-        .modal-actions-mobile {
+        .modal-actions {
             display: flex;
-            gap: 12px;
-            margin-top: 25px;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-cancel {
+            background: #64748b;
+            color: white;
+            flex: 1;
         }
 
         .toast {
             position: fixed;
             top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            right: 20px;
             background: #10b981;
             color: white;
-            padding: 12px 20px;
-            border-radius: 25px;
+            padding: 15px 20px;
+            border-radius: 10px;
             z-index: 2000;
             display: none;
-            animation: toastIn 0.3s ease;
             font-weight: 500;
         }
 
-        @keyframes toastIn {
-            from { transform: translateX(-50%) translateY(-100%); opacity: 0; }
-            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .person-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 20px 30px;
+            background: #f8fafc;
         }
 
-        .no-persons {
-            text-align: center;
-            padding: 60px 20px;
-            color: #64748b;
-        }
-
-        .no-persons-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-        }
-
-        .firebase-setup {
-            margin: 16px;
+        .person-stat-item {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        .firebase-setup h3 {
-            color: #374151;
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-        }
-
-        .firebase-setup p {
-            color: #64748b;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
             font-size: 0.9rem;
-            line-height: 1.5;
-            margin-bottom: 10px;
         }
 
-        .firebase-setup code {
-            background: #f1f5f9;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
+        .person-stat-name {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .person-stat-count {
+            background: #6366f1;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
             font-size: 0.8rem;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <div class="mobile-header">
-        <h1>🚨 Astreintes Planning</h1>
-        <div class="sync-status">
-            <div class="sync-indicator"></div>
-            <span id="syncStatus">Sauvegarde locale active</span>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🚨 Planning Astreintes</h1>
+            <p>Gestion simplifiée des astreintes pour jours fériés</p>
         </div>
-    </div>
 
-    <!-- Stats -->
-    <div class="stats-mobile">
-        <div class="stat-card-mobile">
-            <div class="stat-number-mobile" id="totalPersons">0</div>
-            <div class="stat-label-mobile">Personnes</div>
+        <!-- Stats -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-number" id="totalPersons">0</div>
+                <div class="stat-label">Personnes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalAstreintes">0</div>
+                <div class="stat-label">Total Astreintes</div>
+            </div>
         </div>
-        <div class="stat-card-mobile">
-            <div class="stat-number-mobile" id="totalAstreintes">0</div>
-            <div class="stat-label-mobile">Astreintes</div>
-        </div>
-        <div class="stat-card-mobile">
-            <div class="stat-number-mobile" id="avgPerPerson">0</div>
-            <div class="stat-label-mobile">Moyenne</div>
-        </div>
-        <div class="stat-card-mobile">
-            <div class="stat-number-mobile" id="coverage">0%</div>
-            <div class="stat-label-mobile">Couverture</div>
-        </div>
-    </div>
 
-    <!-- Actions -->
-    <div class="mobile-actions">
-        <button class="btn-mobile btn-success-mobile" onclick="exportData()">
-            📤 Export
-        </button>
-        <button class="btn-mobile btn-warning-mobile" onclick="autoAssign()">
-            🤖 Auto
-        </button>
-    </div>
+        <!-- Actions -->
+        <div class="actions">
+            <button class="btn btn-primary" onclick="openAddPersonModal()">
+                👤 Ajouter une personne
+            </button>
+            <button class="btn btn-success" onclick="exportData()">
+                📤 Exporter les données
+            </button>
+        </div>
 
-    <!-- Firebase Setup Info -->
-    <div class="firebase-setup" id="firebaseSetup">
-        <h3>🔥 Configuration Firebase</h3>
-        <p>Pour activer la sauvegarde cloud :</p>
-        <p>1. Créez un projet sur <code>console.firebase.google.com</code></p>
-        <p>2. Activez Firestore Database</p>
-        <p>3. Remplacez les clés dans le code JavaScript</p>
-        <p>4. Rechargez l'application</p>
-        <button class="btn-mobile btn-primary-mobile" onclick="hideFirebaseSetup()" style="margin-top: 15px; width: 100%;">
-            ✓ Compris, continuer en local
-        </button>
-    </div>
+        <!-- Planning Container -->
+        <div class="planning-container">
+            <div class="planning-header">
+                <div class="planning-title">Planning des astreintes 2025</div>
+            </div>
+            
+            <div id="personStats" class="person-stats" style="display: none;"></div>
 
-    <!-- Planning Container -->
-    <div class="planning-container">
-        <div id="planningContent">
-            <div class="no-persons">
-                <div class="no-persons-icon">👥</div>
-                <p>Aucune personne ajoutée</p>
-                <p style="font-size: 0.9rem; margin-top: 10px; opacity: 0.7;">Appuyez sur + pour commencer</p>
+            <div id="planningContent">
+                <div class="no-persons">
+                    <div class="no-persons-icon">👥</div>
+                    <h3>Aucune personne ajoutée</h3>
+                    <p>Cliquez sur "Ajouter une personne" pour commencer</p>
+                </div>
             </div>
         </div>
     </div>
-
-    <!-- FAB -->
-    <button class="fab" onclick="openAddPersonModal()">+</button>
 
     <!-- Toast -->
     <div id="toast" class="toast"></div>
 
     <!-- Modal Ajout Personne -->
-    <div id="addPersonModal" class="modal-mobile">
-        <div class="modal-content-mobile">
-            <div class="modal-header">
-                <div class="modal-title">Ajouter une personne</div>
-            </div>
-            <div class="form-group-mobile">
-                <label for="personName">Nom complet:</label>
+    <div id="addPersonModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">Ajouter une personne</div>
+            <div class="form-group">
+                <label for="personName">Nom complet :</label>
                 <input type="text" id="personName" placeholder="Ex: Jean Dupont" autocomplete="name">
             </div>
-            <div class="modal-actions-mobile">
-                <button class="btn-mobile" onclick="closeModal()" style="background: #64748b; color: white;">
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closeModal()">
                     Annuler
                 </button>
-                <button class="btn-mobile btn-primary-mobile" onclick="confirmAddPerson()">
+                <button class="btn btn-primary" onclick="confirmAddPerson()">
                     ✓ Ajouter
                 </button>
             </div>
@@ -490,11 +434,10 @@
     </div>
 
     <script>
-        class AstreintesPlanningMobile {
+        class AstreintesPlanningPC {
             constructor() {
                 this.persons = [];
                 this.planning = {};
-                this.lastUpdate = '';
                 this.holidays = [
                     { id: 'jan1', name: '1 JAN', desc: 'Jour de l\'An' },
                     { id: 'paques', name: '21 AVR', desc: 'Lundi Pâques' },
@@ -509,139 +452,8 @@
                     { id: 'dec25', name: '25 DÉC', desc: 'Noël' }
                 ];
                 
-                // Initialisation avec Firebase
-                setTimeout(() => {
-                    this.loadData();
-                    this.setupRealtimeSync();
-                }, 1000); // Attendre que Firebase soit chargé
-                
+                this.loadData();
                 this.updateDisplay();
-            }
-
-            async saveToFirebase() {
-                if (window.firebaseEnabled && window.firebaseDB) {
-                    try {
-                        const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js');
-                        
-                        const planningDoc = doc(window.firebaseDB, 'astreintes', 'planning-2025');
-                        const timestamp = new Date().toISOString();
-                        
-                        await setDoc(planningDoc, {
-                            persons: this.persons,
-                            planning: this.planning,
-                            lastUpdate: timestamp,
-                            device: 'S24-Ultra',
-                            version: '1.0'
-                        });
-                        
-                        this.lastUpdate = timestamp;
-                        document.getElementById('syncStatus').textContent = 'Synchronisé ☁️';
-                        console.log('✅ Sauvegardé sur Firebase');
-                        
-                    } catch (error) {
-                        console.error('❌ Erreur Firebase:', error);
-                        document.getElementById('syncStatus').textContent = 'Erreur sync ⚠️';
-                        this.showToast('❌ Erreur synchronisation');
-                    }
-                }
-            }
-
-            async loadFromFirebase() {
-                if (window.firebaseEnabled && window.firebaseDB) {
-                    try {
-                        const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js');
-                        
-                        const planningDoc = doc(window.firebaseDB, 'astreintes', 'planning-2025');
-                        const docSnap = await getDoc(planningDoc);
-                        
-                        if (docSnap.exists()) {
-                            const data = docSnap.data();
-                            this.persons = data.persons || [];
-                            this.planning = data.planning || {};
-                            this.lastUpdate = data.lastUpdate || '';
-                            this.updateDisplay();
-                            this.showToast('📥 Données chargées depuis Firebase');
-                            console.log('📥 Chargé depuis Firebase:', data);
-                        } else {
-                            console.log('📄 Aucune donnée Firebase trouvée, nouveau planning');
-                        }
-                    } catch (error) {
-                        console.error('❌ Erreur chargement Firebase:', error);
-                        // Fallback sur sauvegarde locale
-                        this.loadLocalData();
-                    }
-                } else {
-                    this.loadLocalData();
-                }
-            }
-
-            async setupRealtimeSync() {
-                if (window.firebaseEnabled && window.firebaseDB) {
-                    try {
-                        const { doc, onSnapshot } = await import('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js');
-                        
-                        const planningDoc = doc(window.firebaseDB, 'astreintes', 'planning-2025');
-                        
-                        onSnapshot(planningDoc, (doc) => {
-                            if (doc.exists()) {
-                                const data = doc.data();
-                                
-                                // Éviter la boucle de synchronisation
-                                if (data.lastUpdate && data.lastUpdate !== this.lastUpdate) {
-                                    this.persons = data.persons || [];
-                                    this.planning = data.planning || {};
-                                    this.lastUpdate = data.lastUpdate;
-                                    this.updateDisplay();
-                                    this.showToast('🔄 Planning mis à jour en temps réel');
-                                    console.log('🔄 Sync temps réel:', data);
-                                }
-                            }
-                        });
-                        
-                        console.log('🔄 Synchronisation temps réel activée');
-                        document.getElementById('syncStatus').textContent = 'Sync temps réel ☁️';
-                        
-                    } catch (error) {
-                        console.error('❌ Erreur sync temps réel:', error);
-                    }
-                }
-            }
-
-            loadLocalData() {
-                try {
-                    if (window.planningData) {
-                        this.persons = window.planningData.persons || [];
-                        this.planning = window.planningData.planning || {};
-                        this.lastUpdate = window.planningData.lastUpdate || '';
-                    }
-                } catch (error) {
-                    console.error('Erreur chargement local:', error);
-                    this.persons = [];
-                    this.planning = {};
-                }
-            }
-
-            saveData() {
-                // Sauvegarde locale d'abord
-                const data = {
-                    persons: this.persons,
-                    planning: this.planning,
-                    lastUpdate: new Date().toISOString()
-                };
-                
-                try {
-                    window.planningData = data;
-                    console.log('💾 Sauvegarde locale OK');
-                } catch (error) {
-                    console.error('Erreur sauvegarde locale:', error);
-                }
-                
-                // Puis Firebase si disponible
-                this.saveToFirebase();
-            }
-
-            async loadData() {
-                await this.loadFromFirebase();
             }
 
             addPerson(name) {
@@ -696,7 +508,7 @@
                 this.saveData();
                 this.updateDisplay();
 
-                // Feedback visuel
+                // Feedback
                 const statusText = {
                     'undefined': 'Non défini',
                     'present': 'En astreinte',
@@ -727,57 +539,20 @@
                 return total;
             }
 
-            getCoveredDays() {
-                let covered = 0;
-                this.holidays.forEach(holiday => {
-                    if (this.planning[holiday.id]) {
-                        const hasPresent = Object.values(this.planning[holiday.id]).includes('present');
-                        if (hasPresent) covered++;
-                    }
-                });
-                return covered;
-            }
-
-            autoAssignAstreintes() {
-                if (this.persons.length === 0) {
-                    this.showToast('⚠️ Ajoutez des personnes d\'abord');
-                    return;
-                }
-
-                // Réinitialiser
-                this.holidays.forEach(holiday => {
-                    if (!this.planning[holiday.id]) {
-                        this.planning[holiday.id] = {};
-                    }
-                    this.persons.forEach(person => {
-                        this.planning[holiday.id][person] = 'undefined';
-                    });
-                });
-
-                // Répartir équitablement
-                this.holidays.forEach((holiday, index) => {
-                    const personIndex = index % this.persons.length;
-                    const selectedPerson = this.persons[personIndex];
-                    this.planning[holiday.id][selectedPerson] = 'present';
-                });
-
-                this.saveData();
-                this.updateDisplay();
-                this.showToast('🤖 Planning automatique généré !');
-            }
-
             exportToJSON() {
                 const data = {
                     exportDate: new Date().toISOString(),
-                    exportFrom: 'S24 Ultra - Planning Mobile',
+                    exportFrom: 'Planning Astreintes PC',
                     persons: this.persons,
                     planning: this.planning,
                     holidays: this.holidays,
                     summary: {
                         totalPersons: this.persons.length,
                         totalAstreintes: this.getTotalAstreintes(),
-                        coverage: `${Math.round((this.getCoveredDays() / 11) * 100)}%`,
-                        avgPerPerson: this.persons.length > 0 ? (this.getTotalAstreintes() / this.persons.length).toFixed(1) : 0
+                        personStats: this.persons.map(person => ({
+                            name: person,
+                            days: this.getPersonTotal(person)
+                        }))
                     }
                 };
 
@@ -791,12 +566,38 @@
                 document.body.removeChild(a);
                 window.URL.revokeObjectURL(url);
 
-                this.showToast('📱 Planning exporté !');
+                this.showToast('💾 Planning exporté !');
+            }
+
+            saveData() {
+                const data = {
+                    persons: this.persons,
+                    planning: this.planning,
+                    lastUpdate: new Date().toISOString()
+                };
+                
+                localStorage.setItem('astreintes-planning', JSON.stringify(data));
+            }
+
+            loadData() {
+                try {
+                    const data = localStorage.getItem('astreintes-planning');
+                    if (data) {
+                        const parsed = JSON.parse(data);
+                        this.persons = parsed.persons || [];
+                        this.planning = parsed.planning || {};
+                    }
+                } catch (error) {
+                    console.error('Erreur chargement:', error);
+                    this.persons = [];
+                    this.planning = {};
+                }
             }
 
             updateDisplay() {
                 this.renderPlanning();
                 this.updateStats();
+                this.renderPersonStats();
             }
 
             renderPlanning() {
@@ -806,25 +607,41 @@
                     container.innerHTML = `
                         <div class="no-persons">
                             <div class="no-persons-icon">👥</div>
-                            <p><strong>Aucune personne ajoutée</strong></p>
-                            <p style="font-size: 0.9rem; margin-top: 10px; opacity: 0.7;">Appuyez sur + pour commencer</p>
+                            <h3>Aucune personne ajoutée</h3>
+                            <p>Cliquez sur "Ajouter une personne" pour commencer</p>
                         </div>
                     `;
                     return;
                 }
 
-                let html = '';
+                // En-têtes des jours fériés
+                let html = `
+                    <div class="holidays-header">
+                        <div class="person-column">Personnes</div>
+                `;
+
+                this.holidays.forEach(holiday => {
+                    html += `
+                        <div class="holiday-header">
+                            <div class="holiday-name">${holiday.name}</div>
+                            <div class="holiday-desc">${holiday.desc}</div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+
+                // Lignes des personnes
                 this.persons.forEach(person => {
                     html += `
-                        <div class="person-card">
-                            <div class="person-header">
+                        <div class="person-row">
+                            <div class="person-info">
                                 <span class="person-name">👤 ${person}</span>
-                                <div style="display: flex; gap: 10px; align-items: center;">
-                                    <span class="person-total">${this.getPersonTotal(person)} jours</span>
+                                <div style="display: flex; align-items: center;">
+                                    <span class="person-count">${this.getPersonTotal(person)} jours</span>
                                     <button class="remove-person" onclick="confirmRemovePerson('${person}')" title="Supprimer ${person}">✕</button>
                                 </div>
                             </div>
-                            <div class="holidays-grid">
                     `;
 
                     this.holidays.forEach(holiday => {
@@ -836,19 +653,37 @@
                         };
 
                         html += `
-                            <div class="holiday-item">
-                                <div class="holiday-date">${holiday.name}</div>
-                                <button class="status-btn status-${status}" 
-                                        onclick="planning.toggleStatus('${person}', '${holiday.id}')"
-                                        title="${holiday.desc}">
-                                    ${statusText[status]}
-                                </button>
-                            </div>
+                            <button class="status-btn status-${status}" 
+                                    onclick="planning.toggleStatus('${person}', '${holiday.id}')"
+                                    title="${holiday.desc} - ${person}">
+                                ${statusText[status]}
+                            </button>
                         `;
                     });
 
+                    html += `</div>`;
+                });
+
+                container.innerHTML = html;
+            }
+
+            renderPersonStats() {
+                const container = document.getElementById('personStats');
+                
+                if (this.persons.length === 0) {
+                    container.style.display = 'none';
+                    return;
+                }
+
+                container.style.display = 'flex';
+                let html = '';
+
+                this.persons.forEach(person => {
+                    const count = this.getPersonTotal(person);
                     html += `
-                            </div>
+                        <div class="person-stat-item">
+                            <span class="person-stat-name">${person}</span>
+                            <span class="person-stat-count">${count}</span>
                         </div>
                     `;
                 });
@@ -859,14 +694,9 @@
             updateStats() {
                 const totalPersons = this.persons.length;
                 const totalAstreintes = this.getTotalAstreintes();
-                const coveredDays = this.getCoveredDays();
-                const coverage = Math.round((coveredDays / 11) * 100);
-                const avgPerPerson = totalPersons > 0 ? (totalAstreintes / totalPersons).toFixed(1) : 0;
 
                 document.getElementById('totalPersons').textContent = totalPersons;
                 document.getElementById('totalAstreintes').textContent = totalAstreintes;
-                document.getElementById('coverage').textContent = coverage + '%';
-                document.getElementById('avgPerPerson').textContent = avgPerPerson;
             }
 
             showToast(message) {
@@ -881,7 +711,7 @@
         }
 
         // Initialisation
-        const planning = new AstreintesPlanningMobile();
+        const planning = new AstreintesPlanningPC();
         window.planning = planning;
 
         // Fonctions globales
@@ -889,7 +719,7 @@
             document.getElementById('addPersonModal').style.display = 'block';
             setTimeout(() => {
                 document.getElementById('personName').focus();
-            }, 300);
+            }, 100);
         }
 
         function closeModal() {
@@ -921,135 +751,21 @@
             planning.exportToJSON();
         }
 
-        function autoAssign() {
-            if (planning.persons.length === 0) {
-                planning.showToast('⚠️ Ajoutez des personnes d\'abord');
-                return;
-            }
-            
-            if (confirm('Générer un planning automatique ?\n\nCela écrasera le planning actuel.')) {
-                planning.autoAssignAstreintes();
-            }
-        }
-
-        function hideFirebaseSetup() {
-            document.getElementById('firebaseSetup').style.display = 'none';
-        }
-
-        // Gestion des événements mobiles
+        // Gestion des événements
         document.getElementById('personName').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 confirmAddPerson();
             }
         });
 
-        // Fermer le modal en touchant l'arrière-plan
+        // Fermer le modal en cliquant à l'extérieur
         document.getElementById('addPersonModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeModal();
             }
         });
 
-        // Vibration pour les retours tactiles (S24 Ultra)
-        function vibrate(pattern = [10]) {
-            if (navigator.vibrate) {
-                navigator.vibrate(pattern);
-            }
-        }
-
-        // Ajouter vibration aux boutons principaux
-        document.addEventListener('click', function(e) {
-            if (e.target.classList.contains('status-btn') || 
-                e.target.classList.contains('fab') || 
-                e.target.classList.contains('btn-mobile')) {
-                vibrate([10]);
-            }
-        });
-
-        // Gestion des gestes tactiles pour une meilleure UX mobile
-        let startY = 0;
-        let startTime = 0;
-
-        document.addEventListener('touchstart', function(e) {
-            startY = e.touches[0].clientY;
-            startTime = Date.now();
-        }, { passive: true });
-
-        document.addEventListener('touchend', function(e) {
-            const endY = e.changedTouches[0].clientY;
-            const endTime = Date.now();
-            const diff = startY - endY;
-            const duration = endTime - startTime;
-            
-            // Swipe vers le haut rapide pour ouvrir le modal d'ajout
-            if (diff > 100 && duration < 300) {
-                openAddPersonModal();
-            }
-        }, { passive: true });
-
-        // Service Worker pour mode PWA (optionnel)
-        if ('serviceWorker' in navigator) {
-            console.log('Service Worker supporté - PWA ready');
-        }
-
-        // Auto-save toutes les 30 secondes
-        setInterval(() => {
-            if (planning.persons.length > 0) {
-                planning.saveData();
-            }
-        }, 30000);
-
-        // Sauvegarde avant fermeture de l'app
-        window.addEventListener('beforeunload', () => {
-            planning.saveData();
-        });
-
-        console.log('🚀 Planning Astreintes Mobile initialisé pour S24 Ultra');
-        console.log('💡 Pour Firebase: remplacez les clés dans le code et décommentez les fonctions Firebase');
-    </script>
-
-    <!-- Firebase Configuration Active -->
-    <script type="module">
-        // Import Firebase modules
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
-        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
-        
-        // Configuration Firebase - VOS VRAIES CLÉS
-        const firebaseConfig = {
-            apiKey: "AIzaSyContOlBfeRDvVSiZFcscq1hI8v8822wzU",
-            authDomain: "app-fitness-f69e4.firebaseapp.com",
-            databaseURL: "https://app-fitness-f69e4-default-rtdb.firebaseio.com",
-            projectId: "app-fitness-f69e4",
-            storageBucket: "app-fitness-f69e4.firebasestorage.app",
-            messagingSenderId: "971340344364",
-            appId: "1:971340344364:web:aaa8a67114e061a0b67589",
-            measurementId: "G-59KBVB01FQ"
-        };
-
-        // Initialiser Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        
-        // Rendre disponible globalement
-        window.firebaseDB = db;
-        window.firebaseApp = app;
-        window.firebaseEnabled = true;
-
-        console.log('🔥 Firebase initialisé avec succès !');
-        document.getElementById('syncStatus').textContent = 'Firebase connecté ☁️';
-
-        // Mise à jour du statut dans l'interface
-        const setupSection = document.getElementById('firebaseSetup');
-        if (setupSection) {
-            setupSection.innerHTML = `
-                <h3 style="color: #10b981;">✅ Firebase Connecté</h3>
-                <p style="color: #10b981;">Sauvegarde cloud active sur votre projet app-fitness-f69e4</p>
-                <p style="font-size: 0.8rem; color: #64748b;">Synchronisation automatique en temps réel</p>
-                <button class="btn-mobile btn-success-mobile" onclick="hideFirebaseSetup()" style="margin-top: 15px; width: 100%;">
-                    ✓ Parfait !
-                </button>
-            `;
-        }
+        console.log('🚀 Planning Astreintes PC initialisé');
     </script>
 </body>
 </html>
