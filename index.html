@@ -2,29 +2,891 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💪 Mon App Fitness</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Planning Astreintes Mobile</title>
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-bottom: 80px;
+        }
+
+        .mobile-header {
+            background: linear-gradient(135deg, #8b5fbf 0%, #6366f1 100%);
+            padding: 20px 16px 25px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .mobile-header h1 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .sync-status {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .sync-indicator {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .stats-mobile {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 16px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card-mobile {
+            background: white;
+            padding: 20px 15px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .stat-number-mobile {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #6366f1;
+            margin-bottom: 5px;
+        }
+
+        .stat-label-mobile {
+            color: #64748b;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .mobile-actions {
+            padding: 0 16px 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-mobile {
+            flex: 1;
+            min-width: 120px;
+            padding: 14px 16px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-primary-mobile {
+            background: #6366f1;
+            color: white;
+        }
+
+        .btn-success-mobile {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-warning-mobile {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-mobile:active {
+            transform: scale(0.95);
+        }
+
+        .planning-container {
+            margin: 0 16px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .person-card {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 15px;
+        }
+
+        .person-card:last-child {
+            border-bottom: none;
+        }
+
+        .person-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .person-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .person-total {
+            background: #f59e0b;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .remove-person {
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .holidays-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 8px;
+        }
+
+        .holiday-item {
+            text-align: center;
+        }
+
+        .holiday-date {
+            font-size: 0.7rem;
+            color: #64748b;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .status-btn {
+            width: 100%;
+            height: 50px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1.1rem;
+        }
+
+        .status-undefined {
+            background: #f1f5f9;
+            color: #64748b;
+            border: 2px dashed #cbd5e1;
+        }
+
+        .status-present {
+            background: #dcfce7;
+            color: #16a34a;
+            border: 2px solid #16a34a;
+        }
+
+        .status-absent {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 2px solid #dc2626;
+        }
+
+        .status-btn:active {
+            transform: scale(0.95);
+        }
+
+        .fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+            transition: all 0.3s ease;
+            z-index: 200;
+        }
+
+        .fab:active {
+            transform: scale(0.9);
+        }
+
+        .modal-mobile {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content-mobile {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            padding: 30px 20px;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .form-group-mobile {
+            margin-bottom: 20px;
+        }
+
+        .form-group-mobile label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .form-group-mobile input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            background: #f9fafb;
+        }
+
+        .form-group-mobile input:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: white;
+        }
+
+        .modal-actions-mobile {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #10b981;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            z-index: 2000;
+            display: none;
+            animation: toastIn 0.3s ease;
+        }
+
+        @keyframes toastIn {
+            from { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+
+        .firebase-config {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            z-index: 150;
+        }
+
+        .no-persons {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .no-persons-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .swipe-hint {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            z-index: 100;
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <div class="app-container">
-        <header>
-            <h1>💪 Pompes & Gainage</h1>
-            <p>Votre coach personnel</p>
-        </header>
+    <!-- Firebase Config Indicator -->
+    <div class="firebase-config" id="firebaseStatus">🔥 Firebase: Non configuré</div>
 
-        <nav>
-            <button id="tab-workout" class="active">Entraînement</button>
-            <button id="tab-history">Historique</button>
-            <button id="tab-stats">Stats</button>
-        </nav>
-
-        <main id="content-container">
-            </main>
+    <!-- Header -->
+    <div class="mobile-header">
+        <h1>🚨 Astreintes Planning</h1>
+        <div class="sync-status">
+            <div class="sync-indicator"></div>
+            <span id="syncStatus">Synchronisé</span>
+        </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="script.js"></script>
-</body>
-</html>
+    <!-- Stats -->
+    <div class="stats-mobile">
+        <div class="stat-card-mobile">
+            <div class="stat-number-mobile" id="totalPersons">0</div>
+            <div class="stat-label-mobile">Personnes</div>
+        </div>
+        <div class="stat-card-mobile">
+            <div class="stat-number-mobile" id="totalAstreintes">0</div>
+            <div class="stat-label-mobile">Astreintes</div>
+        </div>
+        <div class="stat-card-mobile">
+            <div class="stat-number-mobile" id="avgPerPerson">0</div>
+            <div class="stat-label-mobile">Moyenne</div>
+        </div>
+        <div class="stat-card-mobile">
+            <div class="stat-number-mobile" id="coverage">0%</div>
+            <div class="stat-label-mobile">Couverture</div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="mobile-actions">
+        <button class="btn-mobile btn-success-mobile" onclick="exportData()">
+            📤 Export
+        </button>
+        <button class="btn-mobile btn-warning-mobile" onclick="autoAssign()">
+            🤖 Auto
+        </button>
+    </div>
+
+    <!-- Planning Container -->
+    <div class="planning-container">
+        <div id="planningContent">
+            <div class="no-persons">
+                <div class="no-persons-icon">👥</div>
+                <p>Aucune personne ajoutée</p>
+                <p style="font-size: 0.9rem; margin-top: 10px; opacity: 0.7;">Appuyez sur + pour commencer</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAB -->
+    <button class="fab" onclick="openAddPersonModal()">+</button>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Modal Ajout Personne -->
+    <div id="addPersonModal" class="modal-mobile">
+        <div class="modal-content-mobile">
+            <div class="modal-header">
+                <div class="modal-title">Ajouter une personne</div>
+            </div>
+            <div class="form-group-mobile">
+                <label for="personName">Nom complet:</label>
+                <input type="text" id="personName" placeholder="Ex: Jean Dupont" autocomplete="name">
+            </div>
+            <div class="modal-actions-mobile">
+                <button class="btn-mobile btn-secondary" onclick="closeModal()" style="background: #64748b; color: white;">
+                    Annuler
+                </button>
+                <button class="btn-mobile btn-primary-mobile" onclick="confirmAddPerson()">
+                    ✓ Ajouter
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Swipe Hint -->
+    <div id="swipeHint" class="swipe-hint">
+        ← Balayez pour plus d'options
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Configuration Firebase (à remplacer par vos vraies clés)
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+
+        // Configuration Firebase - REMPLACEZ par vos vraies clés
+        const firebaseConfig = {
+            apiKey: "VOTRE_API_KEY",
+            authDomain: "VOTRE_PROJECT.firebaseapp.com",
+            projectId: "VOTRE_PROJECT_ID",
+            storageBucket: "VOTRE_PROJECT.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "VOTRE_APP_ID"
+        };
+
+        // Initialiser Firebase (commenté pour la démo)
+        /*
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        window.db = db;
+        */
+
+        // Simulation Firebase pour la démo
+        window.firebaseEnabled = false;
+        document.getElementById('firebaseStatus').textContent = '🔥 Firebase: Mode démo';
+
+        class AstreintesPlanningMobile {
+            constructor() {
+                this.persons = [];
+                this.planning = {};
+                this.holidays = [
+                    { id: 'jan1', name: '1 JAN', desc: 'Jour de l\'An' },
+                    { id: 'paques', name: '21 AVR', desc: 'Lundi Pâques' },
+                    { id: 'mai1', name: '1 MAI', desc: 'Fête Travail' },
+                    { id: 'mai8', name: '8 MAI', desc: 'Victoire 45' },
+                    { id: 'ascension', name: '29 MAI', desc: 'Ascension' },
+                    { id: 'pentecote', name: '9 JUIN', desc: 'Lundi Pentecôte' },
+                    { id: 'juil14', name: '14 JUIL', desc: 'Fête Nationale' },
+                    { id: 'aout15', name: '15 AOÛT', desc: 'Assomption' },
+                    { id: 'nov1', name: '1 NOV', desc: 'Toussaint' },
+                    { id: 'nov11', name: '11 NOV', desc: 'Armistice' },
+                    { id: 'dec25', name: '25 DÉC', desc: 'Noël' }
+                ];
+                
+                this.loadData();
+                this.updateDisplay();
+                this.setupFirebaseSync();
+            }
+
+            async saveToFirebase() {
+                if (window.firebaseEnabled && window.db) {
+                    try {
+                        const planningDoc = doc(window.db, 'planning', 'astreintes-2025');
+                        await setDoc(planningDoc, {
+                            persons: this.persons,
+                            planning: this.planning,
+                            lastUpdate: new Date().toISOString()
+                        });
+                        this.showToast('✓ Sauvegardé sur Firebase');
+                        document.getElementById('syncStatus').textContent = 'Synchronisé';
+                    } catch (error) {
+                        console.error('Erreur Firebase:', error);
+                        this.showToast('❌ Erreur de synchronisation');
+                        document.getElementById('syncStatus').textContent = 'Erreur sync';
+                    }
+                } else {
+                    // Sauvegarde locale
+                    const data = {
+                        persons: this.persons,
+                        planning: this.planning,
+                        lastUpdate: new Date().toISOString()
+                    };
+                    window.astreintesPlanningData = data;
+                    this.showToast('✓ Sauvegardé localement');
+                }
+            }
+
+            async loadFromFirebase() {
+                if (window.firebaseEnabled && window.db) {
+                    try {
+                        const planningDoc = doc(window.db, 'planning', 'astreintes-2025');
+                        const docSnap = await getDoc(planningDoc);
+                        
+                        if (docSnap.exists()) {
+                            const data = docSnap.data();
+                            this.persons = data.persons || [];
+                            this.planning = data.planning || {};
+                            this.updateDisplay();
+                        }
+                    } catch (error) {
+                        console.error('Erreur chargement Firebase:', error);
+                    }
+                } else if (window.astreintesPlanningData) {
+                    // Chargement local
+                    this.persons = window.astreintesPlanningData.persons || [];
+                    this.planning = window.astreintesPlanningData.planning || {};
+                }
+            }
+
+            setupFirebaseSync() {
+                if (window.firebaseEnabled && window.db) {
+                    const planningDoc = doc(window.db, 'planning', 'astreintes-2025');
+                    onSnapshot(planningDoc, (doc) => {
+                        if (doc.exists()) {
+                            const data = doc.data();
+                            this.persons = data.persons || [];
+                            this.planning = data.planning || {};
+                            this.updateDisplay();
+                        }
+                    });
+                }
+            }
+
+            loadData() {
+                this.loadFromFirebase();
+            }
+
+            saveData() {
+                this.saveToFirebase();
+            }
+
+            addPerson(name) {
+                if (name && !this.persons.includes(name)) {
+                    this.persons.push(name);
+                    // Initialiser le planning
+                    this.holidays.forEach(holiday => {
+                        if (!this.planning[holiday.id]) {
+                            this.planning[holiday.id] = {};
+                        }
+                        this.planning[holiday.id][name] = 'undefined';
+                    });
+                    this.saveData();
+                    this.updateDisplay();
+                    return true;
+                }
+                return false;
+            }
+
+            removePerson(name) {
+                const index = this.persons.indexOf(name);
+                if (index > -1) {
+                    this.persons.splice(index, 1);
+                    this.holidays.forEach(holiday => {
+                        if (this.planning[holiday.id]) {
+                            delete this.planning[holiday.id][name];
+                        }
+                    });
+                    this.saveData();
+                    this.updateDisplay();
+                }
+            }
+
+            toggleStatus(person, holidayId) {
+                if (!this.planning[holidayId]) {
+                    this.planning[holidayId] = {};
+                }
+                
+                const currentStatus = this.planning[holidayId][person] || 'undefined';
+                const statusCycle = ['undefined', 'present', 'absent'];
+                const currentIndex = statusCycle.indexOf(currentStatus);
+                const nextStatus = statusCycle[(currentIndex + 1) % statusCycle.length];
+                
+                this.planning[holidayId][person] = nextStatus;
+                this.saveData();
+                this.updateDisplay();
+            }
+
+            getPersonTotal(person) {
+                let total = 0;
+                this.holidays.forEach(holiday => {
+                    if (this.planning[holiday.id] && this.planning[holiday.id][person] === 'present') {
+                        total++;
+                    }
+                });
+                return total;
+            }
+
+            getTotalAstreintes() {
+                let total = 0;
+                this.holidays.forEach(holiday => {
+                    if (this.planning[holiday.id]) {
+                        Object.values(this.planning[holiday.id]).forEach(status => {
+                            if (status === 'present') total++;
+                        });
+                    }
+                });
+                return total;
+            }
+
+            getCoveredDays() {
+                let covered = 0;
+                this.holidays.forEach(holiday => {
+                    if (this.planning[holiday.id]) {
+                        const hasPresent = Object.values(this.planning[holiday.id]).includes('present');
+                        if (hasPresent) covered++;
+                    }
+                });
+                return covered;
+            }
+
+            autoAssignAstreintes() {
+                // Réinitialiser
+                this.holidays.forEach(holiday => {
+                    if (!this.planning[holiday.id]) {
+                        this.planning[holiday.id] = {};
+                    }
+                    this.persons.forEach(person => {
+                        this.planning[holiday.id][person] = 'undefined';
+                    });
+                });
+
+                // Répartir équitablement
+                this.holidays.forEach((holiday, index) => {
+                    if (this.persons.length > 0) {
+                        const personIndex = index % this.persons.length;
+                        const selectedPerson = this.persons[personIndex];
+                        this.planning[holiday.id][selectedPerson] = 'present';
+                    }
+                });
+
+                this.saveData();
+                this.updateDisplay();
+                this.showToast('🤖 Planning automatique généré !');
+            }
+
+            exportToJSON() {
+                const data = {
+                    exportDate: new Date().toISOString(),
+                    persons: this.persons,
+                    planning: this.planning,
+                    summary: {
+                        totalPersons: this.persons.length,
+                        totalAstreintes: this.getTotalAstreintes(),
+                        coverage: `${Math.round((this.getCoveredDays() / 11) * 100)}%`
+                    }
+                };
+
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `astreintes_planning_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+
+                this.showToast('📱 Planning exporté !');
+            }
+
+            updateDisplay() {
+                this.renderPlanning();
+                this.updateStats();
+            }
+
+            renderPlanning() {
+                const container = document.getElementById('planningContent');
+                
+                if (this.persons.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-persons">
+                            <div class="no-persons-icon">👥</div>
+                            <p>Aucune personne ajoutée</p>
+                            <p style="font-size: 0.9rem; margin-top: 10px; opacity: 0.7;">Appuyez sur + pour commencer</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+                this.persons.forEach(person => {
+                    html += `
+                        <div class="person-card">
+                            <div class="person-header">
+                                <span class="person-name">👤 ${person}</span>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <span class="person-total">${this.getPersonTotal(person)}</span>
+                                    <button class="remove-person" onclick="planning.removePerson('${person}')" title="Supprimer ${person}">✕</button>
+                                </div>
+                            </div>
+                            <div class="holidays-grid">
+                    `;
+
+                    this.holidays.forEach(holiday => {
+                        const status = this.planning[holiday.id]?.[person] || 'undefined';
+                        const statusText = {
+                            'undefined': '?',
+                            'present': '✓',
+                            'absent': '✗'
+                        };
+
+                        html += `
+                            <div class="holiday-item">
+                                <div class="holiday-date">${holiday.name}</div>
+                                <button class="status-btn status-${status}" 
+                                        onclick="planning.toggleStatus('${person}', '${holiday.id}')"
+                                        title="${holiday.desc}">
+                                    ${statusText[status]}
+                                </button>
+                            </div>
+                        `;
+                    });
+
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+            }
+
+            updateStats() {
+                const totalPersons = this.persons.length;
+                const totalAstreintes = this.getTotalAstreintes();
+                const coveredDays = this.getCoveredDays();
+                const coverage = Math.round((coveredDays / 11) * 100);
+                const avgPerPerson = totalPersons > 0 ? (totalAstreintes / totalPersons).toFixed(1) : 0;
+
+                document.getElementById('totalPersons').textContent = totalPersons;
+                document.getElementById('totalAstreintes').textContent = totalAstreintes;
+                document.getElementById('coverage').textContent = coverage + '%';
+                document.getElementById('avgPerPerson').textContent = avgPerPerson;
+            }
+
+            showToast(message) {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.style.display = 'block';
+                
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        // Initialisation
+        const planning = new AstreintesPlanningMobile();
+        window.planning = planning;
+
+        // Fonctions globales
+        function openAddPersonModal() {
+            document.getElementById('addPersonModal').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('personName').focus();
+            }, 300);
+        }
+
+        function closeModal() {
+            document.getElementById('addPersonModal').style.display = 'none';
+            document.getElementById('personName').value = '';
+        }
+
+        function confirmAddPerson() {
+            const name = document.getElementById('personName').value.trim();
+            if (name) {
+                if (planning.addPerson(name)) {
+                    closeModal();
+                    planning.showToast(`✓ ${name} ajouté(e)`);
+                } else {
+                    planning.showToast('❌ Cette personne existe déjà');
+                }
+            } else {
+                planning.showToast('⚠️ Veuillez entrer un nom');
+            }
+        }
+
+        function exportData() {
+            planning.exportToJSON();
+        }
+
+        function autoAssign() {
+            if (planning.persons.length === 0) {
+                planning.showToast('⚠️ Ajoutez des personnes d\'abord');
+                return;
+            }
+            
+            if (confirm('Générer un planning automatique ? Cela écrasera le planning actuel.')) {
+                planning.autoAssignAstreintes();
+            }
+        }
+
+        // Gestion des événements mobiles
+        document.getElementById('personName').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                confirmAddPerson();
+            }
+        });
+
+        // Fermer le modal en touchant l'arrière-plan
+        document.getElementById('addPersonModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Gestion du swipe (simulation)
+        let startY = 0;
+        document.addEventListener('touchstart', function(e) {
+            startY = e.touches[0].clientY;
+        });
+
+        document.addEventListener('touchend', function(e) {
+            const endY = e.changedTouches[0].clientY;
+            const diff = startY - endY;
+            
+            if (Math.abs(diff) > 50) {
+                // Swipe détecté
+                if (diff > 0) {
