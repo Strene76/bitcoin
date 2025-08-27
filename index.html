@@ -192,7 +192,7 @@
 
         .holidays-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 8px;
         }
 
@@ -349,23 +349,12 @@
             z-index: 2000;
             display: none;
             animation: toastIn 0.3s ease;
+            font-weight: 500;
         }
 
         @keyframes toastIn {
             from { transform: translateX(-50%) translateY(-100%); opacity: 0; }
             to { transform: translateX(-50%) translateY(0); opacity: 1; }
-        }
-
-        .firebase-config {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 0.7rem;
-            z-index: 150;
         }
 
         .no-persons {
@@ -379,31 +368,43 @@
             margin-bottom: 15px;
         }
 
-        .swipe-hint {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 20px;
+        .firebase-setup {
+            margin: 16px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .firebase-setup h3 {
+            color: #374151;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .firebase-setup p {
+            color: #64748b;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .firebase-setup code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
             font-size: 0.8rem;
-            z-index: 100;
-            display: none;
         }
     </style>
 </head>
 <body>
-    <!-- Firebase Config Indicator -->
-    <div class="firebase-config" id="firebaseStatus">🔥 Firebase: Non configuré</div>
-
     <!-- Header -->
     <div class="mobile-header">
         <h1>🚨 Astreintes Planning</h1>
         <div class="sync-status">
             <div class="sync-indicator"></div>
-            <span id="syncStatus">Synchronisé</span>
+            <span id="syncStatus">Sauvegarde locale active</span>
         </div>
     </div>
 
@@ -437,6 +438,19 @@
         </button>
     </div>
 
+    <!-- Firebase Setup Info -->
+    <div class="firebase-setup" id="firebaseSetup">
+        <h3>🔥 Configuration Firebase</h3>
+        <p>Pour activer la sauvegarde cloud :</p>
+        <p>1. Créez un projet sur <code>console.firebase.google.com</code></p>
+        <p>2. Activez Firestore Database</p>
+        <p>3. Remplacez les clés dans le code JavaScript</p>
+        <p>4. Rechargez l'application</p>
+        <button class="btn-mobile btn-primary-mobile" onclick="hideFirebaseSetup()" style="margin-top: 15px; width: 100%;">
+            ✓ Compris, continuer en local
+        </button>
+    </div>
+
     <!-- Planning Container -->
     <div class="planning-container">
         <div id="planningContent">
@@ -465,7 +479,7 @@
                 <input type="text" id="personName" placeholder="Ex: Jean Dupont" autocomplete="name">
             </div>
             <div class="modal-actions-mobile">
-                <button class="btn-mobile btn-secondary" onclick="closeModal()" style="background: #64748b; color: white;">
+                <button class="btn-mobile" onclick="closeModal()" style="background: #64748b; color: white;">
                     Annuler
                 </button>
                 <button class="btn-mobile btn-primary-mobile" onclick="confirmAddPerson()">
@@ -475,38 +489,7 @@
         </div>
     </div>
 
-    <!-- Swipe Hint -->
-    <div id="swipeHint" class="swipe-hint">
-        ← Balayez pour plus d'options
-    </div>
-
-    <!-- Firebase SDK -->
-    <script type="module">
-        // Configuration Firebase (à remplacer par vos vraies clés)
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
-        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
-
-        // Configuration Firebase - REMPLACEZ par vos vraies clés
-        const firebaseConfig = {
-            apiKey: "VOTRE_API_KEY",
-            authDomain: "VOTRE_PROJECT.firebaseapp.com",
-            projectId: "VOTRE_PROJECT_ID",
-            storageBucket: "VOTRE_PROJECT.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "VOTRE_APP_ID"
-        };
-
-        // Initialiser Firebase (commenté pour la démo)
-        /*
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        window.db = db;
-        */
-
-        // Simulation Firebase pour la démo
-        window.firebaseEnabled = false;
-        document.getElementById('firebaseStatus').textContent = '🔥 Firebase: Mode démo';
-
+    <script>
         class AstreintesPlanningMobile {
             constructor() {
                 this.persons = [];
@@ -527,91 +510,58 @@
                 
                 this.loadData();
                 this.updateDisplay();
-                this.setupFirebaseSync();
             }
 
-            async saveToFirebase() {
-                if (window.firebaseEnabled && window.db) {
-                    try {
-                        const planningDoc = doc(window.db, 'planning', 'astreintes-2025');
-                        await setDoc(planningDoc, {
-                            persons: this.persons,
-                            planning: this.planning,
-                            lastUpdate: new Date().toISOString()
-                        });
-                        this.showToast('✓ Sauvegardé sur Firebase');
-                        document.getElementById('syncStatus').textContent = 'Synchronisé';
-                    } catch (error) {
-                        console.error('Erreur Firebase:', error);
-                        this.showToast('❌ Erreur de synchronisation');
-                        document.getElementById('syncStatus').textContent = 'Erreur sync';
-                    }
-                } else {
-                    // Sauvegarde locale
-                    const data = {
-                        persons: this.persons,
-                        planning: this.planning,
-                        lastUpdate: new Date().toISOString()
-                    };
-                    window.astreintesPlanningData = data;
-                    this.showToast('✓ Sauvegardé localement');
-                }
-            }
-
-            async loadFromFirebase() {
-                if (window.firebaseEnabled && window.db) {
-                    try {
-                        const planningDoc = doc(window.db, 'planning', 'astreintes-2025');
-                        const docSnap = await getDoc(planningDoc);
-                        
-                        if (docSnap.exists()) {
-                            const data = docSnap.data();
-                            this.persons = data.persons || [];
-                            this.planning = data.planning || {};
-                            this.updateDisplay();
-                        }
-                    } catch (error) {
-                        console.error('Erreur chargement Firebase:', error);
-                    }
-                } else if (window.astreintesPlanningData) {
-                    // Chargement local
-                    this.persons = window.astreintesPlanningData.persons || [];
-                    this.planning = window.astreintesPlanningData.planning || {};
-                }
-            }
-
-            setupFirebaseSync() {
-                if (window.firebaseEnabled && window.db) {
-                    const planningDoc = doc(window.db, 'planning', 'astreintes-2025');
-                    onSnapshot(planningDoc, (doc) => {
-                        if (doc.exists()) {
-                            const data = doc.data();
-                            this.persons = data.persons || [];
-                            this.planning = data.planning || {};
-                            this.updateDisplay();
-                        }
-                    });
+            saveData() {
+                const data = {
+                    persons: this.persons,
+                    planning: this.planning,
+                    lastUpdate: new Date().toISOString()
+                };
+                
+                // Sauvegarde locale dans le navigateur
+                try {
+                    const dataString = JSON.stringify(data);
+                    window.planningData = data;
+                    
+                    // Simulation d'une API de sauvegarde
+                    console.log('💾 Données sauvegardées:', data);
+                    
+                    // Ici vous pourrez ajouter l'appel Firebase plus tard
+                    // this.saveToFirebase(data);
+                    
+                } catch (error) {
+                    console.error('Erreur de sauvegarde:', error);
+                    this.showToast('❌ Erreur de sauvegarde');
                 }
             }
 
             loadData() {
-                this.loadFromFirebase();
-            }
-
-            saveData() {
-                this.saveToFirebase();
+                try {
+                    if (window.planningData) {
+                        this.persons = window.planningData.persons || [];
+                        this.planning = window.planningData.planning || {};
+                    }
+                } catch (error) {
+                    console.error('Erreur de chargement:', error);
+                    this.persons = [];
+                    this.planning = {};
+                }
             }
 
             addPerson(name) {
-                if (name && !this.persons.includes(name)) {
-                    this.persons.push(name);
-                    // Initialiser le planning
+                if (name && name.trim() && !this.persons.includes(name.trim())) {
+                    const cleanName = name.trim();
+                    this.persons.push(cleanName);
+                    
+                    // Initialiser le planning pour cette personne
                     this.holidays.forEach(holiday => {
                         if (!this.planning[holiday.id]) {
                             this.planning[holiday.id] = {};
                         }
-                        this.planning[holiday.id][name] = 'undefined';
+                        this.planning[holiday.id][cleanName] = 'undefined';
                     });
+                    
                     this.saveData();
                     this.updateDisplay();
                     return true;
@@ -623,13 +573,17 @@
                 const index = this.persons.indexOf(name);
                 if (index > -1) {
                     this.persons.splice(index, 1);
+                    
+                    // Nettoyer le planning
                     this.holidays.forEach(holiday => {
                         if (this.planning[holiday.id]) {
                             delete this.planning[holiday.id][name];
                         }
                     });
+                    
                     this.saveData();
                     this.updateDisplay();
+                    this.showToast(`🗑️ ${name} supprimé(e)`);
                 }
             }
 
@@ -646,6 +600,14 @@
                 this.planning[holidayId][person] = nextStatus;
                 this.saveData();
                 this.updateDisplay();
+
+                // Feedback visuel
+                const statusText = {
+                    'undefined': 'Non défini',
+                    'present': 'En astreinte',
+                    'absent': 'Absent'
+                };
+                this.showToast(`${person}: ${statusText[nextStatus]}`);
             }
 
             getPersonTotal(person) {
@@ -682,6 +644,11 @@
             }
 
             autoAssignAstreintes() {
+                if (this.persons.length === 0) {
+                    this.showToast('⚠️ Ajoutez des personnes d\'abord');
+                    return;
+                }
+
                 // Réinitialiser
                 this.holidays.forEach(holiday => {
                     if (!this.planning[holiday.id]) {
@@ -694,11 +661,9 @@
 
                 // Répartir équitablement
                 this.holidays.forEach((holiday, index) => {
-                    if (this.persons.length > 0) {
-                        const personIndex = index % this.persons.length;
-                        const selectedPerson = this.persons[personIndex];
-                        this.planning[holiday.id][selectedPerson] = 'present';
-                    }
+                    const personIndex = index % this.persons.length;
+                    const selectedPerson = this.persons[personIndex];
+                    this.planning[holiday.id][selectedPerson] = 'present';
                 });
 
                 this.saveData();
@@ -709,12 +674,15 @@
             exportToJSON() {
                 const data = {
                     exportDate: new Date().toISOString(),
+                    exportFrom: 'S24 Ultra - Planning Mobile',
                     persons: this.persons,
                     planning: this.planning,
+                    holidays: this.holidays,
                     summary: {
                         totalPersons: this.persons.length,
                         totalAstreintes: this.getTotalAstreintes(),
-                        coverage: `${Math.round((this.getCoveredDays() / 11) * 100)}%`
+                        coverage: `${Math.round((this.getCoveredDays() / 11) * 100)}%`,
+                        avgPerPerson: this.persons.length > 0 ? (this.getTotalAstreintes() / this.persons.length).toFixed(1) : 0
                     }
                 };
 
@@ -722,7 +690,7 @@
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `astreintes_planning_${new Date().toISOString().split('T')[0]}.json`;
+                a.download = `astreintes_${new Date().toISOString().split('T')[0]}.json`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
@@ -743,7 +711,7 @@
                     container.innerHTML = `
                         <div class="no-persons">
                             <div class="no-persons-icon">👥</div>
-                            <p>Aucune personne ajoutée</p>
+                            <p><strong>Aucune personne ajoutée</strong></p>
                             <p style="font-size: 0.9rem; margin-top: 10px; opacity: 0.7;">Appuyez sur + pour commencer</p>
                         </div>
                     `;
@@ -757,8 +725,8 @@
                             <div class="person-header">
                                 <span class="person-name">👤 ${person}</span>
                                 <div style="display: flex; gap: 10px; align-items: center;">
-                                    <span class="person-total">${this.getPersonTotal(person)}</span>
-                                    <button class="remove-person" onclick="planning.removePerson('${person}')" title="Supprimer ${person}">✕</button>
+                                    <span class="person-total">${this.getPersonTotal(person)} jours</span>
+                                    <button class="remove-person" onclick="confirmRemovePerson('${person}')" title="Supprimer ${person}">✕</button>
                                 </div>
                             </div>
                             <div class="holidays-grid">
@@ -848,6 +816,12 @@
             }
         }
 
+        function confirmRemovePerson(name) {
+            if (confirm(`Supprimer ${name} du planning ?`)) {
+                planning.removePerson(name);
+            }
+        }
+
         function exportData() {
             planning.exportToJSON();
         }
@@ -858,9 +832,13 @@
                 return;
             }
             
-            if (confirm('Générer un planning automatique ? Cela écrasera le planning actuel.')) {
+            if (confirm('Générer un planning automatique ?\n\nCela écrasera le planning actuel.')) {
                 planning.autoAssignAstreintes();
             }
+        }
+
+        function hideFirebaseSetup() {
+            document.getElementById('firebaseSetup').style.display = 'none';
         }
 
         // Gestion des événements mobiles
@@ -877,16 +855,155 @@
             }
         });
 
-        // Gestion du swipe (simulation)
+        // Vibration pour les retours tactiles (S24 Ultra)
+        function vibrate(pattern = [10]) {
+            if (navigator.vibrate) {
+                navigator.vibrate(pattern);
+            }
+        }
+
+        // Ajouter vibration aux boutons principaux
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('status-btn') || 
+                e.target.classList.contains('fab') || 
+                e.target.classList.contains('btn-mobile')) {
+                vibrate([10]);
+            }
+        });
+
+        // Gestion des gestes tactiles pour une meilleure UX mobile
         let startY = 0;
+        let startTime = 0;
+
         document.addEventListener('touchstart', function(e) {
             startY = e.touches[0].clientY;
-        });
+            startTime = Date.now();
+        }, { passive: true });
 
         document.addEventListener('touchend', function(e) {
             const endY = e.changedTouches[0].clientY;
+            const endTime = Date.now();
             const diff = startY - endY;
+            const duration = endTime - startTime;
             
-            if (Math.abs(diff) > 50) {
-                // Swipe détecté
-                if (diff > 0) {
+            // Swipe vers le haut rapide pour ouvrir le modal d'ajout
+            if (diff > 100 && duration < 300) {
+                openAddPersonModal();
+            }
+        }, { passive: true });
+
+        // Service Worker pour mode PWA (optionnel)
+        if ('serviceWorker' in navigator) {
+            console.log('Service Worker supporté - PWA ready');
+        }
+
+        // Auto-save toutes les 30 secondes
+        setInterval(() => {
+            if (planning.persons.length > 0) {
+                planning.saveData();
+            }
+        }, 30000);
+
+        // Sauvegarde avant fermeture de l'app
+        window.addEventListener('beforeunload', () => {
+            planning.saveData();
+        });
+
+        console.log('🚀 Planning Astreintes Mobile initialisé pour S24 Ultra');
+        console.log('💡 Pour Firebase: remplacez les clés dans le code et décommentez les fonctions Firebase');
+    </script>
+
+    <!-- Instructions Firebase pour GitHub/Déploiement -->
+    <script type="module">
+        /*
+        CONFIGURATION FIREBASE POUR DÉPLOIEMENT GITHUB/FIREBASE:
+        
+        1. Créez un projet Firebase:
+           - Allez sur https://console.firebase.google.com
+           - Créez un nouveau projet
+           - Activez Firestore Database
+        
+        2. Obtenez vos clés de configuration:
+           - Dans Paramètres du projet > Applications Web
+           - Copiez la config Firebase
+        
+        3. Remplacez cette section par vos vraies clés:
+        
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+        import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+        
+        const firebaseConfig = {
+            apiKey: "VOTRE_VRAIE_API_KEY",
+            authDomain: "votre-projet.firebaseapp.com",
+            projectId: "votre-projet-id",
+            storageBucket: "votre-projet.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "votre-app-id"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // Ajouter ces méthodes à la classe AstreintesPlanningMobile:
+        
+        async saveToFirebase() {
+            try {
+                const planningDoc = doc(db, 'astreintes', 'planning-2025');
+                await setDoc(planningDoc, {
+                    persons: this.persons,
+                    planning: this.planning,
+                    lastUpdate: new Date().toISOString(),
+                    device: 'S24-Ultra'
+                });
+                document.getElementById('syncStatus').textContent = 'Synchronisé ☁️';
+                this.showToast('☁️ Sauvé sur Firebase');
+            } catch (error) {
+                console.error('Erreur Firebase:', error);
+                document.getElementById('syncStatus').textContent = 'Erreur sync ⚠️';
+            }
+        }
+        
+        async loadFromFirebase() {
+            try {
+                const planningDoc = doc(db, 'astreintes', 'planning-2025');
+                const docSnap = await getDoc(planningDoc);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    this.persons = data.persons || [];
+                    this.planning = data.planning || {};
+                    this.updateDisplay();
+                    this.showToast('📥 Données chargées depuis Firebase');
+                }
+            } catch (error) {
+                console.error('Erreur chargement:', error);
+            }
+        }
+        
+        setupRealtimeSync() {
+            const planningDoc = doc(db, 'astreintes', 'planning-2025');
+            onSnapshot(planningDoc, (doc) => {
+                if (doc.exists()) {
+                    const data = doc.data();
+                    if (data.lastUpdate !== this.lastUpdate) {
+                        this.persons = data.persons || [];
+                        this.planning = data.planning || {};
+                        this.updateDisplay();
+                        this.showToast('🔄 Planning mis à jour');
+                    }
+                }
+            });
+        }
+        
+        4. Décommentez l'appel dans saveData():
+           this.saveToFirebase();
+        
+        5. Ajoutez dans le constructeur:
+           this.loadFromFirebase();
+           this.setupRealtimeSync();
+        
+        6. Déployez sur GitHub Pages ou Firebase Hosting
+        */
+    </script>
+</body>
+</html>
