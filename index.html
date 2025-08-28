@@ -383,7 +383,7 @@
         <div class="summary-container">
             <div class="summary-header">
                 <div class="summary-title">📊 Récapitulatif des astreintes</div>
-                <div class="summary-subtitle">Répartition par personne (ordre croissant)</div>
+                <div class="summary-subtitle">Répartition par personne (ordre décroissant)</div>
             </div>
             <div class="summary-content" id="summaryContent">
                 <div class="summary-empty">
@@ -577,11 +577,11 @@
                     return;
                 }
 
-                // Créer un tableau avec les personnes et leur nombre d'astreintes, trié par ordre croissant
+                // Créer un tableau avec les personnes et leur nombre d'astreintes, trié par ordre décroissant
                 const personStats = this.persons.map(person => ({
                     name: person,
                     count: this.getPersonTotal(person)
-                })).sort((a, b) => a.count - b.count);
+                })).sort((a, b) => b.count - a.count);
 
                 let html = '';
                 personStats.forEach(stat => {
