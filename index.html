@@ -55,39 +55,37 @@
 
         .summary-header {
             background: #f8fafc;
-            padding: 20px;
+            padding: 15px 20px;
             border-bottom: 1px solid #e5e7eb;
         }
 
         .summary-title {
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             font-weight: 600;
             color: #374151;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
 
         .summary-subtitle {
             color: #64748b;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
         }
 
         .summary-content {
-            padding: 20px;
+            padding: 15px 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
         }
 
         .summary-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 16px;
-            margin-bottom: 8px;
+            padding: 8px 12px;
             background: #f8fafc;
-            border-radius: 8px;
-            border-left: 4px solid #6366f1;
-        }
-
-        .summary-item:last-child {
-            margin-bottom: 0;
+            border-radius: 6px;
+            border-left: 3px solid #6366f1;
         }
 
         .summary-person {
@@ -95,27 +93,29 @@
             color: #374151;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            font-size: 0.85rem;
         }
 
         .summary-count {
             background: #6366f1;
             color: white;
-            padding: 6px 12px;
-            border-radius: 12px;
+            padding: 4px 8px;
+            border-radius: 10px;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.75rem;
         }
 
         .summary-empty {
             text-align: center;
-            padding: 40px;
+            padding: 25px;
             color: #64748b;
+            grid-column: 1 / -1;
         }
 
         .summary-empty-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
+            font-size: 2rem;
+            margin-bottom: 10px;
         }
 
         .actions {
