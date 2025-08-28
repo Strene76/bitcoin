@@ -45,32 +45,77 @@
             font-size: 1rem;
         }
 
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
+        .summary-container {
             background: white;
-            padding: 18px;
             border-radius: 12px;
-            text-align: center;
             box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            overflow: hidden;
         }
 
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #6366f1;
+        .summary-header {
+            background: #f8fafc;
+            padding: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .summary-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #374151;
             margin-bottom: 8px;
         }
 
-        .stat-label {
+        .summary-subtitle {
             color: #64748b;
+            font-size: 0.95rem;
+        }
+
+        .summary-content {
+            padding: 20px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid #6366f1;
+        }
+
+        .summary-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .summary-person {
+            font-weight: 600;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .summary-count {
+            background: #6366f1;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-weight: 600;
             font-size: 0.9rem;
-            font-weight: 500;
+        }
+
+        .summary-empty {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+
+        .summary-empty-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
         }
 
         .actions {
@@ -94,11 +139,6 @@
 
         .btn-primary {
             background: #6366f1;
-            color: white;
-        }
-
-        .btn-success {
-            background: #10b981;
             color: white;
         }
 
@@ -329,40 +369,6 @@
             display: none;
             font-weight: 500;
         }
-
-        .person-stats {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 15px;
-            padding: 15px 20px;
-            background: #f8fafc;
-        }
-
-        .person-stat-item {
-            background: white;
-            padding: 8px 12px;
-            border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.8rem;
-        }
-
-        .person-stat-name {
-            font-weight: 600;
-            color: #374151;
-        }
-
-        .person-stat-count {
-            background: #6366f1;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
     </style>
 </head>
 <body>
@@ -373,15 +379,18 @@
             <p>Gestion simplifiée des astreintes pour jours fériés</p>
         </div>
 
-        <!-- Stats -->
-        <div class="stats-container">
-            <div class="stat-card">
-                <div class="stat-number" id="totalPersons">0</div>
-                <div class="stat-label">Personnes</div>
+        <!-- Récapitulatif -->
+        <div class="summary-container">
+            <div class="summary-header">
+                <div class="summary-title">📊 Récapitulatif des astreintes</div>
+                <div class="summary-subtitle">Répartition par personne (ordre croissant)</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-number" id="totalAstreintes">0</div>
-                <div class="stat-label">Total Astreintes</div>
+            <div class="summary-content" id="summaryContent">
+                <div class="summary-empty">
+                    <div class="summary-empty-icon">📋</div>
+                    <h3>Aucune donnée disponible</h3>
+                    <p>Ajoutez des personnes pour voir le récapitulatif</p>
+                </div>
             </div>
         </div>
 
@@ -390,9 +399,6 @@
             <button class="btn btn-primary" onclick="openAddPersonModal()">
                 👤 Ajouter une personne
             </button>
-            <button class="btn btn-success" onclick="exportData()">
-                📤 Exporter les données
-            </button>
         </div>
 
         <!-- Planning Container -->
@@ -400,8 +406,6 @@
             <div class="planning-header">
                 <div class="planning-title">Planning des astreintes 2025</div>
             </div>
-            
-            <div id="personStats" class="person-stats" style="display: none;"></div>
 
             <div id="planningContent">
                 <div class="no-persons">
@@ -529,48 +533,6 @@
                 return total;
             }
 
-            getTotalAstreintes() {
-                let total = 0;
-                this.holidays.forEach(holiday => {
-                    if (this.planning[holiday.id]) {
-                        Object.values(this.planning[holiday.id]).forEach(status => {
-                            if (status === 'present') total++;
-                        });
-                    }
-                });
-                return total;
-            }
-
-            exportToJSON() {
-                const data = {
-                    exportDate: new Date().toISOString(),
-                    exportFrom: 'Planning Astreintes PC',
-                    persons: this.persons,
-                    planning: this.planning,
-                    holidays: this.holidays,
-                    summary: {
-                        totalPersons: this.persons.length,
-                        totalAstreintes: this.getTotalAstreintes(),
-                        personStats: this.persons.map(person => ({
-                            name: person,
-                            days: this.getPersonTotal(person)
-                        }))
-                    }
-                };
-
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `astreintes_${new Date().toISOString().split('T')[0]}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-
-                this.showToast('💾 Planning exporté !');
-            }
-
             saveData() {
                 const data = {
                     persons: this.persons,
@@ -598,8 +560,42 @@
 
             updateDisplay() {
                 this.renderPlanning();
-                this.updateStats();
-                this.renderPersonStats();
+                this.renderSummary();
+            }
+
+            renderSummary() {
+                const container = document.getElementById('summaryContent');
+                
+                if (this.persons.length === 0) {
+                    container.innerHTML = `
+                        <div class="summary-empty">
+                            <div class="summary-empty-icon">📋</div>
+                            <h3>Aucune donnée disponible</h3>
+                            <p>Ajoutez des personnes pour voir le récapitulatif</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Créer un tableau avec les personnes et leur nombre d'astreintes, trié par ordre croissant
+                const personStats = this.persons.map(person => ({
+                    name: person,
+                    count: this.getPersonTotal(person)
+                })).sort((a, b) => a.count - b.count);
+
+                let html = '';
+                personStats.forEach(stat => {
+                    html += `
+                        <div class="summary-item">
+                            <div class="summary-person">
+                                👤 ${stat.name}
+                            </div>
+                            <div class="summary-count">${stat.count} jour${stat.count > 1 ? 's' : ''}</div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
             }
 
             renderPlanning() {
@@ -669,38 +665,6 @@
                 container.innerHTML = html;
             }
 
-            renderPersonStats() {
-                const container = document.getElementById('personStats');
-                
-                if (this.persons.length === 0) {
-                    container.style.display = 'none';
-                    return;
-                }
-
-                container.style.display = 'flex';
-                let html = '';
-
-                this.persons.forEach(person => {
-                    const count = this.getPersonTotal(person);
-                    html += `
-                        <div class="person-stat-item">
-                            <span class="person-stat-name">${person}</span>
-                            <span class="person-stat-count">${count}</span>
-                        </div>
-                    `;
-                });
-
-                container.innerHTML = html;
-            }
-
-            updateStats() {
-                const totalPersons = this.persons.length;
-                const totalAstreintes = this.getTotalAstreintes();
-
-                document.getElementById('totalPersons').textContent = totalPersons;
-                document.getElementById('totalAstreintes').textContent = totalAstreintes;
-            }
-
             showToast(message) {
                 const toast = document.getElementById('toast');
                 toast.textContent = message;
@@ -747,10 +711,6 @@
             if (confirm(`Supprimer ${name} du planning ?`)) {
                 planning.removePerson(name);
             }
-        }
-
-        function exportData() {
-            planning.exportToJSON();
         }
 
         // Gestion des événements
