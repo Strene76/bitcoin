@@ -259,21 +259,15 @@
         }
 
         .status-undefined {
-            background: #f1f5f9;
+            background: #ffffff;
             color: #64748b;
-            border: 2px dashed #cbd5e1;
+            border: 2px solid #e5e7eb;
         }
 
         .status-present {
             background: #dcfce7;
             color: #16a34a;
             border: 2px solid #16a34a;
-        }
-
-        .status-absent {
-            background: #fee2e2;
-            color: #dc2626;
-            border: 2px solid #dc2626;
         }
 
         .status-btn:hover {
@@ -506,7 +500,7 @@
                 }
                 
                 const currentStatus = this.planning[holidayId][person] || 'undefined';
-                const statusCycle = ['undefined', 'present', 'absent'];
+                const statusCycle = ['undefined', 'present'];
                 const currentIndex = statusCycle.indexOf(currentStatus);
                 const nextStatus = statusCycle[(currentIndex + 1) % statusCycle.length];
                 
@@ -516,9 +510,8 @@
 
                 // Feedback
                 const statusText = {
-                    'undefined': 'Non défini',
-                    'present': 'En astreinte',
-                    'absent': 'Absent'
+                    'undefined': 'Libre',
+                    'present': 'En astreinte'
                 };
                 this.showToast(`${person}: ${statusText[nextStatus]}`);
             }
@@ -645,9 +638,8 @@
                     this.holidays.forEach(holiday => {
                         const status = this.planning[holiday.id]?.[person] || 'undefined';
                         const statusText = {
-                            'undefined': '?',
-                            'present': '✓',
-                            'absent': '✗'
+                            'undefined': '',
+                            'present': '✓'
                         };
 
                         html += `
