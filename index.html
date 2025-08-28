@@ -354,6 +354,9 @@
         .year-btn {
             transition: all 0.3s ease;
             opacity: 0.7;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            min-width: 60px;
         }
 
         .year-btn.active {
@@ -388,13 +391,16 @@
             <p>Gestion simplifiée des astreintes pour jours fériés</p>
             
             <!-- Navigation années -->
-            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
-                <button class="btn btn-primary year-btn active" onclick="switchYear(2025)" id="btn2025">
-                    📅 2025
-                </button>
-                <button class="btn btn-primary year-btn" onclick="switchYear(2026)" id="btn2026">
-                    📅 2026
-                </button>
+            <div style="margin-top: 20px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+                <button class="btn btn-primary year-btn active" onclick="switchYear(2025)" id="btn2025">2025</button>
+                <button class="btn btn-primary year-btn" onclick="switchYear(2026)" id="btn2026">2026</button>
+                <button class="btn btn-primary year-btn" onclick="switchYear(2027)" id="btn2027">2027</button>
+                <button class="btn btn-primary year-btn" onclick="switchYear(2028)" id="btn2028">2028</button>
+                <button class="btn btn-primary year-btn" onclick="switchYear(2029)" id="btn2029">2029</button>
+                <button class="btn btn-primary year-btn" onclick="switchYear(2030)" id="btn2030">2030</button>
+                <button class="btn btn-primary year-btn" onclick="switchYear(2031)" id="btn2031">2031</button>
+                <button class="btn btn-primary year-btn" onclick="switchYear(2032)" id="btn2032">2032</button>
+                <button class="btn btn-primary year-btn" onclick="switchYear(2033)" id="btn2033">2033</button>
             </div>
         </div>
 
@@ -463,41 +469,76 @@
             constructor() {
                 this.persons = [];
                 this.currentYear = 2025;
-                this.planning = {
-                    2025: {},
-                    2026: {}
-                };
-                this.holidays = {
-                    2025: [
-                        { id: 'paques', name: '21 AVR', desc: 'Lundi Pâques' },
-                        { id: 'mai1', name: '1 MAI', desc: 'Fête Travail' },
-                        { id: 'mai8', name: '8 MAI', desc: 'Victoire 45' },
-                        { id: 'ascension', name: '29 MAI', desc: 'Ascension' },
-                        { id: 'pentecote', name: '9 JUIN', desc: 'Lundi Pentecôte' },
-                        { id: 'juil14', name: '14 JUIL', desc: 'Fête Nationale' },
-                        { id: 'aout15', name: '15 AOÛT', desc: 'Assomption' },
-                        { id: 'nov1', name: '1 NOV', desc: 'Toussaint' },
-                        { id: 'nov11', name: '11 NOV', desc: 'Armistice' },
-                        { id: 'dec25', name: '25 DÉC', desc: 'Noël' },
-                        { id: 'jan1', name: '1 JAN', desc: 'Jour de l\'An' }
-                    ],
-                    2026: [
-                        { id: 'paques', name: '6 AVR', desc: 'Lundi Pâques' },
-                        { id: 'mai1', name: '1 MAI', desc: 'Fête Travail' },
-                        { id: 'mai8', name: '8 MAI', desc: 'Victoire 45' },
-                        { id: 'ascension', name: '14 MAI', desc: 'Ascension' },
-                        { id: 'pentecote', name: '25 MAI', desc: 'Lundi Pentecôte' },
-                        { id: 'juil14', name: '14 JUIL', desc: 'Fête Nationale' },
-                        { id: 'aout15', name: '15 AOÛT', desc: 'Assomption' },
-                        { id: 'nov1', name: '1 NOV', desc: 'Toussaint' },
-                        { id: 'nov11', name: '11 NOV', desc: 'Armistice' },
-                        { id: 'dec25', name: '25 DÉC', desc: 'Noël' },
-                        { id: 'jan1', name: '1 JAN', desc: 'Jour de l\'An' }
-                    ]
-                };
+                this.planning = {};
+                this.holidays = {};
+                
+                // Initialiser toutes les années de 2025 à 2033
+                this.initializeYears();
                 
                 this.loadData();
                 this.updateDisplay();
+            }
+
+            initializeYears() {
+                const years = [2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033];
+                
+                years.forEach(year => {
+                    this.planning[year] = {};
+                    this.holidays[year] = this.calculateHolidays(year);
+                });
+            }
+
+            calculateHolidays(year) {
+                // Calculer Pâques pour l'année donnée
+                const easter = this.calculateEaster(year);
+                const easterMonday = new Date(easter);
+                easterMonday.setDate(easter.getDate() + 1);
+                
+                const ascension = new Date(easter);
+                ascension.setDate(easter.getDate() + 39);
+                
+                const pentecoteMonday = new Date(easter);
+                pentecoteMonday.setDate(easter.getDate() + 50);
+
+                return [
+                    { id: 'paques', name: this.formatDate(easterMonday), desc: 'Lundi Pâques' },
+                    { id: 'mai1', name: '1 MAI', desc: 'Fête Travail' },
+                    { id: 'mai8', name: '8 MAI', desc: 'Victoire 45' },
+                    { id: 'ascension', name: this.formatDate(ascension), desc: 'Ascension' },
+                    { id: 'pentecote', name: this.formatDate(pentecoteMonday), desc: 'Lundi Pentecôte' },
+                    { id: 'juil14', name: '14 JUIL', desc: 'Fête Nationale' },
+                    { id: 'aout15', name: '15 AOÛT', desc: 'Assomption' },
+                    { id: 'nov1', name: '1 NOV', desc: 'Toussaint' },
+                    { id: 'nov11', name: '11 NOV', desc: 'Armistice' },
+                    { id: 'dec25', name: '25 DÉC', desc: 'Noël' },
+                    { id: 'jan1', name: '1 JAN', desc: 'Jour de l\'An' }
+                ];
+            }
+
+            calculateEaster(year) {
+                // Algorithme de calcul de Pâques (algorithme de Gauss)
+                const a = year % 19;
+                const b = Math.floor(year / 100);
+                const c = year % 100;
+                const d = Math.floor(b / 4);
+                const e = b % 4;
+                const f = Math.floor((b + 8) / 25);
+                const g = Math.floor((b - f + 1) / 3);
+                const h = (19 * a + b - d - g + 15) % 30;
+                const i = Math.floor(c / 4);
+                const k = c % 4;
+                const l = (32 + 2 * e + 2 * i - h - k) % 7;
+                const m = Math.floor((a + 11 * h + 22 * l) / 451);
+                const month = Math.floor((h + l - 7 * m + 114) / 31);
+                const day = ((h + l - 7 * m + 114) % 31) + 1;
+                
+                return new Date(year, month - 1, day);
+            }
+
+            formatDate(date) {
+                const day = date.getDate();
+                const months = ['JAN', 'FÉV', 'MAR', 'AVR', 'MAI', 'JUIN', 'JUIL', 'AOÛT', 'SEPT', 'OCT', 'NOV', 'DÉC'];
+                return `${day} ${months[date.getMonth()]}`;
             }
 
             addPerson(name) {
@@ -505,8 +546,9 @@
                     const cleanName = name.trim();
                     this.persons.push(cleanName);
                     
-                    // Initialiser le planning pour cette personne sur les deux années
-                    [2025, 2026].forEach(year => {
+                    // Initialiser le planning pour cette personne sur toutes les années
+                    const years = [2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033];
+                    years.forEach(year => {
                         this.holidays[year].forEach(holiday => {
                             if (!this.planning[year][holiday.id]) {
                                 this.planning[year][holiday.id] = {};
@@ -527,8 +569,9 @@
                 if (index > -1) {
                     this.persons.splice(index, 1);
                     
-                    // Nettoyer le planning sur les deux années
-                    [2025, 2026].forEach(year => {
+                    // Nettoyer le planning sur toutes les années
+                    const years = [2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033];
+                    years.forEach(year => {
                         this.holidays[year].forEach(holiday => {
                             if (this.planning[year][holiday.id]) {
                                 delete this.planning[year][holiday.id][name];
@@ -550,8 +593,13 @@
             }
 
             updateYearButtons() {
-                document.getElementById('btn2025').classList.toggle('active', this.currentYear === 2025);
-                document.getElementById('btn2026').classList.toggle('active', this.currentYear === 2026);
+                const years = [2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033];
+                years.forEach(year => {
+                    const btn = document.getElementById(`btn${year}`);
+                    if (btn) {
+                        btn.classList.toggle('active', this.currentYear === year);
+                    }
+                });
                 document.getElementById('planningYearTitle').textContent = `Planning des astreintes ${this.currentYear}`;
             }
 
@@ -604,18 +652,26 @@
                     if (data) {
                         const parsed = JSON.parse(data);
                         this.persons = parsed.persons || [];
-                        this.planning = parsed.planning || { 2025: {}, 2026: {} };
+                        this.planning = parsed.planning || {};
                         this.currentYear = parsed.currentYear || 2025;
                         
-                        // S'assurer que les structures existent pour les deux années
-                        if (!this.planning[2025]) this.planning[2025] = {};
-                        if (!this.planning[2026]) this.planning[2026] = {};
+                        // S'assurer que les structures existent pour toutes les années
+                        const years = [2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033];
+                        years.forEach(year => {
+                            if (!this.planning[year]) this.planning[year] = {};
+                        });
                     }
                 } catch (error) {
                     console.error('Erreur chargement:', error);
                     this.persons = [];
-                    this.planning = { 2025: {}, 2026: {} };
+                    this.planning = {};
                     this.currentYear = 2025;
+                    
+                    // Réinitialiser toutes les années
+                    const years = [2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033];
+                    years.forEach(year => {
+                        this.planning[year] = {};
+                    });
                 }
             }
 
