@@ -351,6 +351,21 @@
             flex: 1;
         }
 
+        .year-btn {
+            transition: all 0.3s ease;
+            opacity: 0.7;
+        }
+
+        .year-btn.active {
+            opacity: 1;
+            background: #4f46e5 !important;
+            transform: scale(1.05);
+        }
+
+        .year-btn:not(.active):hover {
+            opacity: 1;
+        }
+
         .toast {
             position: fixed;
             top: 20px;
@@ -371,6 +386,16 @@
         <div class="header">
             <h1>🚨 Planning Astreintes</h1>
             <p>Gestion simplifiée des astreintes pour jours fériés</p>
+            
+            <!-- Navigation années -->
+            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
+                <button class="btn btn-primary year-btn active" onclick="switchYear(2025)" id="btn2025">
+                    📅 2025
+                </button>
+                <button class="btn btn-primary year-btn" onclick="switchYear(2026)" id="btn2026">
+                    📅 2026
+                </button>
+            </div>
         </div>
 
         <!-- Récapitulatif -->
@@ -398,7 +423,7 @@
         <!-- Planning Container -->
         <div class="planning-container">
             <div class="planning-header">
-                <div class="planning-title">Planning des astreintes 2025</div>
+                <div class="planning-title" id="planningYearTitle">Planning des astreintes 2025</div>
             </div>
 
             <div id="planningContent">
@@ -437,20 +462,39 @@
         class AstreintesPlanningPC {
             constructor() {
                 this.persons = [];
-                this.planning = {};
-                this.holidays = [
-                    { id: 'paques', name: '21 AVR', desc: 'Lundi Pâques' },
-                    { id: 'mai1', name: '1 MAI', desc: 'Fête Travail' },
-                    { id: 'mai8', name: '8 MAI', desc: 'Victoire 45' },
-                    { id: 'ascension', name: '29 MAI', desc: 'Ascension' },
-                    { id: 'pentecote', name: '9 JUIN', desc: 'Lundi Pentecôte' },
-                    { id: 'juil14', name: '14 JUIL', desc: 'Fête Nationale' },
-                    { id: 'aout15', name: '15 AOÛT', desc: 'Assomption' },
-                    { id: 'nov1', name: '1 NOV', desc: 'Toussaint' },
-                    { id: 'nov11', name: '11 NOV', desc: 'Armistice' },
-                    { id: 'dec25', name: '25 DÉC', desc: 'Noël' },
-                    { id: 'jan1', name: '1 JAN', desc: 'Jour de l\'An' }
-                ];
+                this.currentYear = 2025;
+                this.planning = {
+                    2025: {},
+                    2026: {}
+                };
+                this.holidays = {
+                    2025: [
+                        { id: 'paques', name: '21 AVR', desc: 'Lundi Pâques' },
+                        { id: 'mai1', name: '1 MAI', desc: 'Fête Travail' },
+                        { id: 'mai8', name: '8 MAI', desc: 'Victoire 45' },
+                        { id: 'ascension', name: '29 MAI', desc: 'Ascension' },
+                        { id: 'pentecote', name: '9 JUIN', desc: 'Lundi Pentecôte' },
+                        { id: 'juil14', name: '14 JUIL', desc: 'Fête Nationale' },
+                        { id: 'aout15', name: '15 AOÛT', desc: 'Assomption' },
+                        { id: 'nov1', name: '1 NOV', desc: 'Toussaint' },
+                        { id: 'nov11', name: '11 NOV', desc: 'Armistice' },
+                        { id: 'dec25', name: '25 DÉC', desc: 'Noël' },
+                        { id: 'jan1', name: '1 JAN', desc: 'Jour de l\'An' }
+                    ],
+                    2026: [
+                        { id: 'paques', name: '6 AVR', desc: 'Lundi Pâques' },
+                        { id: 'mai1', name: '1 MAI', desc: 'Fête Travail' },
+                        { id: 'mai8', name: '8 MAI', desc: 'Victoire 45' },
+                        { id: 'ascension', name: '14 MAI', desc: 'Ascension' },
+                        { id: 'pentecote', name: '25 MAI', desc: 'Lundi Pentecôte' },
+                        { id: 'juil14', name: '14 JUIL', desc: 'Fête Nationale' },
+                        { id: 'aout15', name: '15 AOÛT', desc: 'Assomption' },
+                        { id: 'nov1', name: '1 NOV', desc: 'Toussaint' },
+                        { id: 'nov11', name: '11 NOV', desc: 'Armistice' },
+                        { id: 'dec25', name: '25 DÉC', desc: 'Noël' },
+                        { id: 'jan1', name: '1 JAN', desc: 'Jour de l\'An' }
+                    ]
+                };
                 
                 this.loadData();
                 this.updateDisplay();
@@ -461,12 +505,14 @@
                     const cleanName = name.trim();
                     this.persons.push(cleanName);
                     
-                    // Initialiser le planning pour cette personne
-                    this.holidays.forEach(holiday => {
-                        if (!this.planning[holiday.id]) {
-                            this.planning[holiday.id] = {};
-                        }
-                        this.planning[holiday.id][cleanName] = 'undefined';
+                    // Initialiser le planning pour cette personne sur les deux années
+                    [2025, 2026].forEach(year => {
+                        this.holidays[year].forEach(holiday => {
+                            if (!this.planning[year][holiday.id]) {
+                                this.planning[year][holiday.id] = {};
+                            }
+                            this.planning[year][holiday.id][cleanName] = 'undefined';
+                        });
                     });
                     
                     this.saveData();
@@ -481,11 +527,13 @@
                 if (index > -1) {
                     this.persons.splice(index, 1);
                     
-                    // Nettoyer le planning
-                    this.holidays.forEach(holiday => {
-                        if (this.planning[holiday.id]) {
-                            delete this.planning[holiday.id][name];
-                        }
+                    // Nettoyer le planning sur les deux années
+                    [2025, 2026].forEach(year => {
+                        this.holidays[year].forEach(holiday => {
+                            if (this.planning[year][holiday.id]) {
+                                delete this.planning[year][holiday.id][name];
+                            }
+                        });
                     });
                     
                     this.saveData();
@@ -494,17 +542,30 @@
                 }
             }
 
+            switchYear(year) {
+                this.currentYear = year;
+                this.updateYearButtons();
+                this.updateDisplay();
+                this.showToast(`📅 Basculé sur ${year}`);
+            }
+
+            updateYearButtons() {
+                document.getElementById('btn2025').classList.toggle('active', this.currentYear === 2025);
+                document.getElementById('btn2026').classList.toggle('active', this.currentYear === 2026);
+                document.getElementById('planningYearTitle').textContent = `Planning des astreintes ${this.currentYear}`;
+            }
+
             toggleStatus(person, holidayId) {
-                if (!this.planning[holidayId]) {
-                    this.planning[holidayId] = {};
+                if (!this.planning[this.currentYear][holidayId]) {
+                    this.planning[this.currentYear][holidayId] = {};
                 }
                 
-                const currentStatus = this.planning[holidayId][person] || 'undefined';
+                const currentStatus = this.planning[this.currentYear][holidayId][person] || 'undefined';
                 const statusCycle = ['undefined', 'present'];
                 const currentIndex = statusCycle.indexOf(currentStatus);
                 const nextStatus = statusCycle[(currentIndex + 1) % statusCycle.length];
                 
-                this.planning[holidayId][person] = nextStatus;
+                this.planning[this.currentYear][holidayId][person] = nextStatus;
                 this.saveData();
                 this.updateDisplay();
 
@@ -518,8 +579,8 @@
 
             getPersonTotal(person) {
                 let total = 0;
-                this.holidays.forEach(holiday => {
-                    if (this.planning[holiday.id] && this.planning[holiday.id][person] === 'present') {
+                this.holidays[this.currentYear].forEach(holiday => {
+                    if (this.planning[this.currentYear][holiday.id] && this.planning[this.currentYear][holiday.id][person] === 'present') {
                         total++;
                     }
                 });
@@ -530,6 +591,7 @@
                 const data = {
                     persons: this.persons,
                     planning: this.planning,
+                    currentYear: this.currentYear,
                     lastUpdate: new Date().toISOString()
                 };
                 
@@ -542,18 +604,25 @@
                     if (data) {
                         const parsed = JSON.parse(data);
                         this.persons = parsed.persons || [];
-                        this.planning = parsed.planning || {};
+                        this.planning = parsed.planning || { 2025: {}, 2026: {} };
+                        this.currentYear = parsed.currentYear || 2025;
+                        
+                        // S'assurer que les structures existent pour les deux années
+                        if (!this.planning[2025]) this.planning[2025] = {};
+                        if (!this.planning[2026]) this.planning[2026] = {};
                     }
                 } catch (error) {
                     console.error('Erreur chargement:', error);
                     this.persons = [];
-                    this.planning = {};
+                    this.planning = { 2025: {}, 2026: {} };
+                    this.currentYear = 2025;
                 }
             }
 
             updateDisplay() {
                 this.renderPlanning();
                 this.renderSummary();
+                this.updateYearButtons();
             }
 
             renderSummary() {
@@ -611,7 +680,7 @@
                         <div class="person-column">Personnes</div>
                 `;
 
-                this.holidays.forEach(holiday => {
+                this.holidays[this.currentYear].forEach(holiday => {
                     html += `
                         <div class="holiday-header">
                             <div class="holiday-name">${holiday.name}</div>
@@ -635,8 +704,8 @@
                             </div>
                     `;
 
-                    this.holidays.forEach(holiday => {
-                        const status = this.planning[holiday.id]?.[person] || 'undefined';
+                    this.holidays[this.currentYear].forEach(holiday => {
+                        const status = this.planning[this.currentYear][holiday.id]?.[person] || 'undefined';
                         const statusText = {
                             'undefined': '',
                             'present': '✓'
@@ -673,6 +742,9 @@
         window.planning = planning;
 
         // Fonctions globales
+        function switchYear(year) {
+            planning.switchYear(year);
+        }
         function openAddPersonModal() {
             document.getElementById('addPersonModal').style.display = 'block';
             setTimeout(() => {
