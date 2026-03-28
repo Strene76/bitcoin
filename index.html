@@ -2,852 +2,608 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planning Astreintes</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>InvestTrack</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg: #0f172a;
+            --bg2: #1e293b;
+            --bg3: #334155;
+            --text: #f1f5f9;
+            --text2: #94a3b8;
+            --border: #334155;
+            --green: #10b981;
+            --red: #ef4444;
+            --blue: #3b82f6;
+            --purple: #8b5cf6;
+            --accent: linear-gradient(135deg, #3b82f6, #8b5cf6);
         }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100dvh; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
+        /* HEADER */
         .header {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+            background: var(--bg2);
+            padding: 14px 16px 10px;
+            border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 50;
+            display: flex; align-items: center; justify-content: space-between;
         }
-
-        .header h1 {
-            color: #374151;
-            font-size: 2rem;
-            margin-bottom: 8px;
-            font-weight: 600;
+        .header-title { font-size: 1.1rem; font-weight: 700; background: var(--accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header-actions { display: flex; gap: 8px; }
+        .icon-btn {
+            background: var(--bg3); border: none; color: var(--text2);
+            width: 38px; height: 38px; border-radius: 10px;
+            font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
         }
+        .icon-btn:active { background: var(--blue); color: white; }
 
-        .header p {
-            color: #64748b;
-            font-size: 1rem;
+        /* HERO KPIs */
+        .hero {
+            background: var(--bg2);
+            padding: 18px 16px 14px;
+            border-bottom: 1px solid var(--border);
         }
+        .hero-label { font-size: 0.7rem; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .hero-value {
+            font-size: 2.4rem; font-weight: 800; letter-spacing: -1px;
+            background: var(--accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: rgba(16, 185, 129, 0.15); color: var(--green);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 20px; padding: 3px 10px; font-size: 0.8rem; font-weight: 700;
+            margin-top: 6px;
+        }
+        .hero-badge.neg { background: rgba(239, 68, 68, 0.15); color: var(--red); border-color: rgba(239, 68, 68, 0.3); }
+        .kpi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+        .kpi {
+            background: var(--bg3); border-radius: 10px; padding: 10px 12px;
+        }
+        .kpi-l { font-size: 0.68rem; color: var(--text2); margin-bottom: 3px; }
+        .kpi-v { font-size: 1rem; font-weight: 700; }
 
-        .summary-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+        /* CONTENT */
+        .content { padding: 12px; display: flex; flex-direction: column; gap: 12px; }
+
+        /* CARD */
+        .card {
+            background: var(--bg2); border-radius: 14px; border: 1px solid var(--border);
             overflow: hidden;
         }
-
-        .summary-header {
-            background: #f8fafc;
-            padding: 15px 20px;
-            border-bottom: 1px solid #e5e7eb;
+        .card-header {
+            padding: 12px 14px 8px; font-size: 0.8rem; font-weight: 700;
+            color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
         }
+        .card-body { padding: 12px 14px; }
 
-        .summary-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 4px;
+        /* CHART */
+        .chart-wrap { height: 200px; position: relative; padding: 8px 4px 4px; }
+
+        /* ROI LIST */
+        .roi-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 9px 0; border-bottom: 1px solid var(--border);
         }
+        .roi-item:last-child { border-bottom: none; }
+        .roi-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .roi-name { font-size: 0.78rem; flex: 1; color: var(--text); }
+        .roi-bar-wrap { width: 60px; height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+        .roi-bar { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+        .roi-val { font-size: 0.8rem; font-weight: 700; min-width: 52px; text-align: right; }
 
-        .summary-subtitle {
-            color: #64748b;
-            font-size: 0.85rem;
+        /* TABS */
+        .tabs { display: flex; background: var(--bg3); border-radius: 10px; padding: 3px; margin: 0 14px 10px; }
+        .tab {
+            flex: 1; text-align: center; padding: 6px 4px; border-radius: 7px;
+            font-size: 0.72rem; font-weight: 600; color: var(--text2); cursor: pointer;
+            transition: all 0.2s;
         }
+        .tab.active { background: var(--blue); color: white; }
 
-        .summary-content {
-            padding: 15px 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 10px;
+        /* IMPORT MODAL */
+        .overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.7); z-index: 100;
+            align-items: flex-end; justify-content: center;
         }
-
-        .summary-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 12px;
-            background: #f8fafc;
-            border-radius: 6px;
-            border-left: 3px solid #6366f1;
+        .overlay.show { display: flex; }
+        .sheet {
+            background: var(--bg2); border-radius: 20px 20px 0 0;
+            padding: 20px 20px 36px; width: 100%; max-width: 480px;
+            border-top: 1px solid var(--border);
         }
-
-        .summary-person {
-            font-weight: 600;
-            color: #374151;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.85rem;
+        .sheet h3 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; }
+        .sheet-btn {
+            width: 100%; padding: 14px; border-radius: 12px; border: none;
+            font-size: 0.9rem; font-weight: 700; cursor: pointer; margin-bottom: 10px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
+        .sheet-btn-primary { background: var(--blue); color: white; }
+        .sheet-btn-secondary { background: var(--bg3); color: var(--text); }
+        .sheet-btn:active { opacity: 0.8; }
 
-        .summary-count {
-            background: #6366f1;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.75rem;
-        }
-
-        .summary-empty {
-            text-align: center;
-            padding: 25px;
-            color: #64748b;
-            grid-column: 1 / -1;
-        }
-
-        .summary-empty-icon {
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-
-        .actions {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-primary {
-            background: #6366f1;
-            color: white;
-        }
-
-        .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-        }
-
-        .planning-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        .planning-header {
-            background: #f8fafc;
-            padding: 15px 20px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .planning-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 8px;
-        }
-
-        .holidays-header {
-            display: grid;
-            grid-template-columns: 180px repeat(11, 1fr);
-            gap: 8px;
-            padding: 0 20px 15px;
-            margin-top: 15px;
-        }
-
-        .person-column {
-            font-weight: 600;
-            color: #374151;
-            font-size: 0.9rem;
-        }
-
-        .holiday-header {
-            text-align: center;
-            font-size: 0.65rem;
-            color: #64748b;
-            font-weight: 500;
-        }
-
-        .holiday-name {
-            font-weight: 600;
-            margin-bottom: 2px;
-        }
-
-        .holiday-desc {
-            opacity: 0.8;
-        }
-
-        .person-row {
-            display: grid;
-            grid-template-columns: 180px repeat(11, 1fr);
-            gap: 8px;
-            padding: 10px 20px;
-            border-bottom: 1px solid #f1f5f9;
-            align-items: center;
-        }
-
-        .person-row:last-child {
-            border-bottom: none;
-        }
-
-        .person-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .person-name {
-            font-weight: 600;
-            color: #374151;
-            font-size: 0.9rem;
-        }
-
-        .person-count {
-            background: #f59e0b;
-            color: white;
-            padding: 3px 6px;
-            border-radius: 10px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-
-        .remove-person {
-            background: #dc2626;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 0.8rem;
-            margin-left: 8px;
-        }
-
-        .status-btn {
-            width: 45px;
-            height: 28px;
-            border: none;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.8rem;
-            justify-self: center;
-        }
-
-        .status-undefined {
-            background: #ffffff;
-            color: #64748b;
-            border: 2px solid #e5e7eb;
-        }
-
-        .status-present {
-            background: #dcfce7;
-            color: #16a34a;
-            border: 2px solid #16a34a;
-        }
-
-        .status-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .no-persons {
-            text-align: center;
-            padding: 40px;
-            color: #64748b;
-        }
-
-        .no-persons-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 1000;
-        }
-
-        .modal-content {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            min-width: 400px;
-        }
-
-        .modal-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-            color: #374151;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 10px 12px;
-            border: 2px solid #e5e7eb;
-            border-radius: 6px;
-            font-size: 1rem;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #6366f1;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 25px;
-        }
-
-        .btn-cancel {
-            background: #64748b;
-            color: white;
-            flex: 1;
-        }
-
-        .year-btn {
-            transition: all 0.3s ease;
-            opacity: 0.7;
-            padding: 8px 16px;
-            font-size: 0.85rem;
-            min-width: 60px;
-        }
-
-        .year-btn.active {
-            opacity: 1;
-            background: #4f46e5 !important;
-            transform: scale(1.05);
-        }
-
-        .year-btn:not(.active):hover {
-            opacity: 1;
-        }
-
+        /* TOAST */
         .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #10b981;
-            color: white;
-            padding: 12px 18px;
-            border-radius: 8px;
-            z-index: 2000;
-            display: none;
-            font-weight: 500;
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+            background: var(--bg2); border: 1px solid var(--border);
+            color: var(--text); padding: 10px 20px; border-radius: 20px;
+            font-size: 0.85rem; font-weight: 600; z-index: 200;
+            opacity: 0; transition: opacity 0.3s; pointer-events: none;
+        }
+        .toast.show { opacity: 1; }
+
+        /* EMPTY */
+        .empty { text-align: center; padding: 30px; color: var(--text2); font-size: 0.85rem; line-height: 1.6; }
+
+        /* SECTION YEAR BADGE */
+        .year-badge {
+            display: inline-flex; align-items: center;
+            background: var(--bg3); border-radius: 8px; padding: 4px 10px;
+            font-size: 0.72rem; font-weight: 700; color: var(--text2);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>🚨 Planning Astreintes</h1>
-            <p>Gestion simplifiée des astreintes pour jours fériés</p>
-            
-            <!-- Navigation années -->
-            <div style="margin-top: 20px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-                <button class="btn btn-primary year-btn active" onclick="switchYear(2025)" id="btn2025">2025</button>
-                <button class="btn btn-primary year-btn" onclick="switchYear(2026)" id="btn2026">2026</button>
-                <button class="btn btn-primary year-btn" onclick="switchYear(2027)" id="btn2027">2027</button>
-                <button class="btn btn-primary year-btn" onclick="switchYear(2028)" id="btn2028">2028</button>
-                <button class="btn btn-primary year-btn" onclick="switchYear(2029)" id="btn2029">2029</button>
-                <button class="btn btn-primary year-btn" onclick="switchYear(2030)" id="btn2030">2030</button>
-                <button class="btn btn-primary year-btn" onclick="switchYear(2031)" id="btn2031">2031</button>
-                <button class="btn btn-primary year-btn" onclick="switchYear(2032)" id="btn2032">2032</button>
-                <button class="btn btn-primary year-btn" onclick="switchYear(2033)" id="btn2033">2033</button>
-            </div>
+
+<header class="header">
+    <div class="header-title">📊 InvestTrack</div>
+    <div class="header-actions">
+        <button class="icon-btn" onclick="openSheet()" title="Import/Export">💾</button>
+    </div>
+</header>
+
+<!-- HERO -->
+<div class="hero" id="hero">
+    <div class="hero-label">Valeur totale du portefeuille</div>
+    <div class="hero-value" id="heroValue">— €</div>
+    <div id="heroBadge" class="hero-badge">— %</div>
+    <div class="kpi-row">
+        <div class="kpi">
+            <div class="kpi-l">💼 Investi</div>
+            <div class="kpi-v" id="kpiInvested">— €</div>
         </div>
-
-        <!-- Récapitulatif -->
-        <div class="summary-container">
-            <div class="summary-header">
-                <div class="summary-title">📊 Récapitulatif des astreintes</div>
-                <div class="summary-subtitle">Répartition par personne (ordre décroissant)</div>
-            </div>
-            <div class="summary-content" id="summaryContent">
-                <div class="summary-empty">
-                    <div class="summary-empty-icon">📋</div>
-                    <h3>Aucune donnée disponible</h3>
-                    <p>Ajoutez des personnes pour voir le récapitulatif</p>
-                </div>
-            </div>
+        <div class="kpi">
+            <div class="kpi-l">💵 Plus-value</div>
+            <div class="kpi-v" id="kpiGain">— €</div>
         </div>
+    </div>
+</div>
 
-        <!-- Actions -->
-        <div class="actions">
-            <button class="btn btn-primary" onclick="openAddPersonModal()">
-                👤 Ajouter une personne
-            </button>
-        </div>
-
-        <!-- Planning Container -->
-        <div class="planning-container">
-            <div class="planning-header">
-                <div class="planning-title" id="planningYearTitle">Planning des astreintes 2025</div>
-            </div>
-
-            <div id="planningContent">
-                <div class="no-persons">
-                    <div class="no-persons-icon">👥</div>
-                    <h3>Aucune personne ajoutée</h3>
-                    <p>Cliquez sur "Ajouter une personne" pour commencer</p>
-                </div>
-            </div>
+<!-- CONTENT -->
+<div class="content">
+    <!-- Graphe évolution -->
+    <div class="card">
+        <div class="card-header">📈 Évolution du patrimoine</div>
+        <div class="chart-wrap">
+            <canvas id="totalChart"></canvas>
         </div>
     </div>
 
-    <!-- Toast -->
-    <div id="toast" class="toast"></div>
-
-    <!-- Modal Ajout Personne -->
-    <div id="addPersonModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-title">Ajouter une personne</div>
-            <div class="form-group">
-                <label for="personName">Nom complet :</label>
-                <input type="text" id="personName" placeholder="Ex: Jean Dupont" autocomplete="name">
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-cancel" onclick="closeModal()">
-                    Annuler
-                </button>
-                <button class="btn btn-primary" onclick="confirmAddPerson()">
-                    ✓ Ajouter
-                </button>
-            </div>
+    <!-- ROI par actif avec onglets années -->
+    <div class="card">
+        <div class="card-header" style="display:flex; align-items:center; justify-content:space-between;">
+            <span>🎯 Performance par actif</span>
+        </div>
+        <div class="tabs" id="yearTabs"></div>
+        <div class="card-body" style="padding-top:0;">
+            <div id="roiList"></div>
         </div>
     </div>
+</div>
 
-    <script>
-        class AstreintesPlanningPC {
-            constructor() {
-                this.persons = [];
-                this.currentYear = 2025;
-                this.planning = {};
-                this.holidays = {};
-                
-                // Initialiser toutes les années de 2025 à 2033
-                this.initializeYears();
-                
-                this.loadData();
-                this.updateDisplay();
-            }
+<!-- IMPORT/EXPORT SHEET -->
+<div class="overlay" id="sheet" onclick="closeSheetOutside(event)">
+    <div class="sheet">
+        <h3>💾 Données</h3>
+        <button class="sheet-btn sheet-btn-primary" onclick="importData()">
+            📂 Importer une sauvegarde JSON
+        </button>
+        <button class="sheet-btn sheet-btn-secondary" onclick="exportData()">
+            ⬆️ Exporter vers JSON
+        </button>
+        <button class="sheet-btn sheet-btn-secondary" onclick="closeSheet()">
+            Annuler
+        </button>
+    </div>
+</div>
 
-            initializeYears() {
-                const years = [2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033];
-                
-                years.forEach(year => {
-                    this.planning[year] = {};
-                    this.holidays[year] = this.calculateHolidays(year);
-                });
-            }
+<div class="toast" id="toast"></div>
 
-            calculateHolidays(year) {
-                // Calculer Pâques pour l'année donnée
-                const easter = this.calculateEaster(year);
-                const easterMonday = new Date(easter);
-                easterMonday.setDate(easter.getDate() + 1);
-                
-                const ascension = new Date(easter);
-                ascension.setDate(easter.getDate() + 39);
-                
-                const pentecoteMonday = new Date(easter);
-                pentecoteMonday.setDate(easter.getDate() + 50);
+<script>
+// ============================================
+// DONNÉES PAR DÉFAUT (identiques à l'app principale)
+// ============================================
+let portfolioData = {
+    "2024": {
+        months: ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"],
+        assets: [
+            { name: "PEE Natixis - ENGIE", type: "ETF", color: "#10b981", investissement: 15000, values: {} },
+            { name: "PEE Amundi - EQUANS", type: "ETF", color: "#34d399", investissement: 5000, values: {} },
+            { name: "PEA - Ishares World", type: "ETF", color: "#3b82f6", investissement: 10000, values: {} },
+            { name: "Gold", type: "METAL", color: "#f59e0b", investissement: 3000, values: {} },
+            { name: "Bitcoin Trust", type: "ETF", color: "#f97316", investissement: 5000, values: {} },
+            { name: "Bitcoin", type: "CRYPTO", color: "#f59e0b", investissement: 2000, values: {} },
+            { name: "Ethereum", type: "CRYPTO", color: "#8b5cf6", investissement: 2000, values: {} },
+            { name: "Cardano", type: "CRYPTO", color: "#6366f1", investissement: 500, values: {} },
+            { name: "Solana", type: "CRYPTO", color: "#ec4899", investissement: 1000, values: {} },
+            { name: "Kaspa", type: "CRYPTO", color: "#14b8a6", investissement: 500, values: {} },
+            { name: "Dogcoin", type: "CRYPTO", color: "#eab308", investissement: 500, values: {} },
+            { name: "Shiba Inu", type: "CRYPTO", color: "#ef4444", investissement: 500, values: {} },
+            { name: "Action Momentum mondiales", type: "ETF", color: "#0ea5e9", investissement: 5000, values: {} },
+            { name: "Tech US", type: "ETF", color: "#8b5cf6", investissement: 3000, values: {} },
+            { name: "Materiaux US", type: "ETF", color: "#64748b", investissement: 2000, values: {} },
+            { name: "Alphabet", type: "STOCK", color: "#22c55e", investissement: 2750, values: {} }
+        ]
+    },
+    "2025": {
+        months: ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"],
+        assets: [
+            { name: "PEE Natixis - ENGIE", type: "ETF", color: "#10b981", investissement: 15000, values: {} },
+            { name: "PEE Amundi - EQUANS", type: "ETF", color: "#34d399", investissement: 5000, values: {} },
+            { name: "PEA - Ishares World", type: "ETF", color: "#3b82f6", investissement: 10000, values: {} },
+            { name: "Gold", type: "METAL", color: "#f59e0b", investissement: 3000, values: {} },
+            { name: "Bitcoin Trust", type: "ETF", color: "#f97316", investissement: 5000, values: {} },
+            { name: "Bitcoin", type: "CRYPTO", color: "#f59e0b", investissement: 2000, values: {} },
+            { name: "Ethereum", type: "CRYPTO", color: "#8b5cf6", investissement: 2000, values: {} },
+            { name: "Cardano", type: "CRYPTO", color: "#6366f1", investissement: 500, values: {} },
+            { name: "Solana", type: "CRYPTO", color: "#ec4899", investissement: 1000, values: {} },
+            { name: "Kaspa", type: "CRYPTO", color: "#14b8a6", investissement: 500, values: {} },
+            { name: "Dogcoin", type: "CRYPTO", color: "#eab308", investissement: 500, values: {} },
+            { name: "Shiba Inu", type: "CRYPTO", color: "#ef4444", investissement: 500, values: {} },
+            { name: "Action Momentum mondiales", type: "ETF", color: "#0ea5e9", investissement: 5000, values: {} },
+            { name: "Tech US", type: "ETF", color: "#8b5cf6", investissement: 3000, values: {} },
+            { name: "Materiaux US", type: "ETF", color: "#64748b", investissement: 2000, values: {} },
+            { name: "Alphabet", type: "STOCK", color: "#22c55e", investissement: 2750, values: {} }
+        ]
+    },
+    "2026": {
+        months: ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"],
+        assets: [
+            { name: "PEE Natixis - ENGIE", type: "ETF", color: "#10b981", investissement: 15000, values: {} },
+            { name: "PEE Amundi - EQUANS", type: "ETF", color: "#34d399", investissement: 5000, values: {} },
+            { name: "PEA - Ishares World", type: "ETF", color: "#3b82f6", investissement: 10000, values: {} },
+            { name: "Gold", type: "METAL", color: "#f59e0b", investissement: 3000, values: {} },
+            { name: "Bitcoin Trust", type: "ETF", color: "#f97316", investissement: 5000, values: {} },
+            { name: "Bitcoin", type: "CRYPTO", color: "#f59e0b", investissement: 2000, values: {} },
+            { name: "Ethereum", type: "CRYPTO", color: "#8b5cf6", investissement: 2000, values: {} },
+            { name: "Cardano", type: "CRYPTO", color: "#6366f1", investissement: 500, values: {} },
+            { name: "Solana", type: "CRYPTO", color: "#ec4899", investissement: 1000, values: {} },
+            { name: "Kaspa", type: "CRYPTO", color: "#14b8a6", investissement: 500, values: {} },
+            { name: "Dogcoin", type: "CRYPTO", color: "#eab308", investissement: 500, values: {} },
+            { name: "Shiba Inu", type: "CRYPTO", color: "#ef4444", investissement: 500, values: {} },
+            { name: "Action Momentum mondiales", type: "ETF", color: "#0ea5e9", investissement: 5000, values: {} },
+            { name: "Tech US", type: "ETF", color: "#8b5cf6", investissement: 3000, values: {} },
+            { name: "Materiaux US", type: "ETF", color: "#64748b", investissement: 2000, values: {} },
+            { name: "Alphabet", type: "STOCK", color: "#22c55e", investissement: 2750, values: {} }
+        ]
+    }
+};
 
-                return [
-                    { id: 'paques', name: this.formatDate(easterMonday), desc: 'Lundi Pâques' },
-                    { id: 'mai1', name: '1 MAI', desc: 'Fête Travail' },
-                    { id: 'mai8', name: '8 MAI', desc: 'Victoire 45' },
-                    { id: 'ascension', name: this.formatDate(ascension), desc: 'Ascension' },
-                    { id: 'pentecote', name: this.formatDate(pentecoteMonday), desc: 'Lundi Pentecôte' },
-                    { id: 'juil14', name: '14 JUIL', desc: 'Fête Nationale' },
-                    { id: 'aout15', name: '15 AOÛT', desc: 'Assomption' },
-                    { id: 'nov1', name: '1 NOV', desc: 'Toussaint' },
-                    { id: 'nov11', name: '11 NOV', desc: 'Armistice' },
-                    { id: 'dec25', name: '25 DÉC', desc: 'Noël' },
-                    { id: 'jan1', name: '1 JAN', desc: 'Jour de l\'An' }
-                ];
-            }
+let withdrawals = {};
+let totalChart = null;
+let activeYear = null;
 
-            calculateEaster(year) {
-                // Algorithme de calcul de Pâques (algorithme de Gauss)
-                const a = year % 19;
-                const b = Math.floor(year / 100);
-                const c = year % 100;
-                const d = Math.floor(b / 4);
-                const e = b % 4;
-                const f = Math.floor((b + 8) / 25);
-                const g = Math.floor((b - f + 1) / 3);
-                const h = (19 * a + b - d - g + 15) % 30;
-                const i = Math.floor(c / 4);
-                const k = c % 4;
-                const l = (32 + 2 * e + 2 * i - h - k) % 7;
-                const m = Math.floor((a + 11 * h + 22 * l) / 451);
-                const month = Math.floor((h + l - 7 * m + 114) / 31);
-                const day = ((h + l - 7 * m + 114) % 31) + 1;
-                
-                return new Date(year, month - 1, day);
-            }
+// ============================================
+// UTILS
+// ============================================
+function fmt(n) {
+    if (n === undefined || n === null || isNaN(n)) return '—';
+    return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(n) + ' €';
+}
 
-            formatDate(date) {
-                const day = date.getDate();
-                const months = ['JAN', 'FÉV', 'MAR', 'AVR', 'MAI', 'JUIN', 'JUIL', 'AOÛT', 'SEPT', 'OCT', 'NOV', 'DÉC'];
-                return `${day} ${months[date.getMonth()]}`;
-            }
+function fmtPct(n) {
+    if (n === undefined || n === null || isNaN(n)) return '—';
+    return (n >= 0 ? '+' : '') + n.toFixed(1) + '%';
+}
 
-            addPerson(name) {
-                if (name && name.trim() && !this.persons.includes(name.trim())) {
-                    const cleanName = name.trim();
-                    this.persons.push(cleanName);
-                    
-                    // Initialiser le planning pour cette personne sur toutes les années
-                    const years = [2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033];
-                    years.forEach(year => {
-                        this.holidays[year].forEach(holiday => {
-                            if (!this.planning[year][holiday.id]) {
-                                this.planning[year][holiday.id] = {};
-                            }
-                            this.planning[year][holiday.id][cleanName] = 'undefined';
-                        });
+function getWithdrawal(year, assetName, month) {
+    return withdrawals[year]?.[assetName]?.[month] || 0;
+}
+
+// ============================================
+// LOAD / SAVE
+// ============================================
+function loadData() {
+    const saved = localStorage.getItem('portfolioData');
+    if (saved) {
+        try {
+            const parsed = JSON.parse(saved);
+            Object.keys(parsed).forEach(year => {
+                if (portfolioData[year]) {
+                    parsed[year].assets.forEach((a, i) => {
+                        if (portfolioData[year].assets[i]) {
+                            portfolioData[year].assets[i].values = a.values;
+                        }
                     });
-                    
-                    this.saveData();
-                    this.updateDisplay();
-                    return true;
-                }
-                return false;
-            }
-
-            removePerson(name) {
-                const index = this.persons.indexOf(name);
-                if (index > -1) {
-                    this.persons.splice(index, 1);
-                    
-                    // Nettoyer le planning sur toutes les années
-                    const years = [2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033];
-                    years.forEach(year => {
-                        this.holidays[year].forEach(holiday => {
-                            if (this.planning[year][holiday.id]) {
-                                delete this.planning[year][holiday.id][name];
-                            }
-                        });
-                    });
-                    
-                    this.saveData();
-                    this.updateDisplay();
-                    this.showToast(`🗑️ ${name} supprimé(e)`);
-                }
-            }
-
-            switchYear(year) {
-                this.currentYear = year;
-                this.updateYearButtons();
-                this.updateDisplay();
-                this.showToast(`📅 Basculé sur ${year}`);
-            }
-
-            updateYearButtons() {
-                const years = [2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033];
-                years.forEach(year => {
-                    const btn = document.getElementById(`btn${year}`);
-                    if (btn) {
-                        btn.classList.toggle('active', this.currentYear === year);
-                    }
-                });
-                document.getElementById('planningYearTitle').textContent = `Planning des astreintes ${this.currentYear}`;
-            }
-
-            toggleStatus(person, holidayId) {
-                if (!this.planning[this.currentYear][holidayId]) {
-                    this.planning[this.currentYear][holidayId] = {};
-                }
-                
-                const currentStatus = this.planning[this.currentYear][holidayId][person] || 'undefined';
-                const statusCycle = ['undefined', 'present'];
-                const currentIndex = statusCycle.indexOf(currentStatus);
-                const nextStatus = statusCycle[(currentIndex + 1) % statusCycle.length];
-                
-                this.planning[this.currentYear][holidayId][person] = nextStatus;
-                this.saveData();
-                this.updateDisplay();
-
-                // Feedback
-                const statusText = {
-                    'undefined': 'Libre',
-                    'present': 'En astreinte'
-                };
-                this.showToast(`${person}: ${statusText[nextStatus]}`);
-            }
-
-            getPersonTotal(person) {
-                let total = 0;
-                this.holidays[this.currentYear].forEach(holiday => {
-                    if (this.planning[this.currentYear][holiday.id] && this.planning[this.currentYear][holiday.id][person] === 'present') {
-                        total++;
-                    }
-                });
-                return total;
-            }
-
-            saveData() {
-                const data = {
-                    persons: this.persons,
-                    planning: this.planning,
-                    currentYear: this.currentYear,
-                    lastUpdate: new Date().toISOString()
-                };
-                
-                localStorage.setItem('astreintes-planning', JSON.stringify(data));
-            }
-
-            loadData() {
-                try {
-                    const data = localStorage.getItem('astreintes-planning');
-                    if (data) {
-                        const parsed = JSON.parse(data);
-                        this.persons = parsed.persons || [];
-                        this.planning = parsed.planning || {};
-                        this.currentYear = parsed.currentYear || 2025;
-                        
-                        // S'assurer que les structures existent pour toutes les années
-                        const years = [2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033];
-                        years.forEach(year => {
-                            if (!this.planning[year]) this.planning[year] = {};
-                        });
-                    }
-                } catch (error) {
-                    console.error('Erreur chargement:', error);
-                    this.persons = [];
-                    this.planning = {};
-                    this.currentYear = 2025;
-                    
-                    // Réinitialiser toutes les années
-                    const years = [2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033];
-                    years.forEach(year => {
-                        this.planning[year] = {};
-                    });
-                }
-            }
-
-            updateDisplay() {
-                this.renderPlanning();
-                this.renderSummary();
-                this.updateYearButtons();
-            }
-
-            renderSummary() {
-                const container = document.getElementById('summaryContent');
-                
-                if (this.persons.length === 0) {
-                    container.innerHTML = `
-                        <div class="summary-empty">
-                            <div class="summary-empty-icon">📋</div>
-                            <h3>Aucune donnée disponible</h3>
-                            <p>Ajoutez des personnes pour voir le récapitulatif</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                // Créer un tableau avec les personnes et leur nombre d'astreintes, trié par ordre décroissant
-                const personStats = this.persons.map(person => ({
-                    name: person,
-                    count: this.getPersonTotal(person)
-                })).sort((a, b) => b.count - a.count);
-
-                let html = '';
-                personStats.forEach(stat => {
-                    html += `
-                        <div class="summary-item">
-                            <div class="summary-person">
-                                👤 ${stat.name}
-                            </div>
-                            <div class="summary-count">${stat.count} jour${stat.count > 1 ? 's' : ''}</div>
-                        </div>
-                    `;
-                });
-
-                container.innerHTML = html;
-            }
-
-            renderPlanning() {
-                const container = document.getElementById('planningContent');
-                
-                if (this.persons.length === 0) {
-                    container.innerHTML = `
-                        <div class="no-persons">
-                            <div class="no-persons-icon">👥</div>
-                            <h3>Aucune personne ajoutée</h3>
-                            <p>Cliquez sur "Ajouter une personne" pour commencer</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                // En-têtes des jours fériés
-                let html = `
-                    <div class="holidays-header">
-                        <div class="person-column">Personnes</div>
-                `;
-
-                this.holidays[this.currentYear].forEach(holiday => {
-                    html += `
-                        <div class="holiday-header">
-                            <div class="holiday-name">${holiday.name}</div>
-                            <div class="holiday-desc">${holiday.desc}</div>
-                        </div>
-                    `;
-                });
-
-                html += `</div>`;
-
-                // Lignes des personnes
-                this.persons.forEach(person => {
-                    html += `
-                        <div class="person-row">
-                            <div class="person-info">
-                                <span class="person-name">👤 ${person}</span>
-                                <div style="display: flex; align-items: center;">
-                                    <span class="person-count">${this.getPersonTotal(person)} jours</span>
-                                    <button class="remove-person" onclick="confirmRemovePerson('${person}')" title="Supprimer ${person}">✕</button>
-                                </div>
-                            </div>
-                    `;
-
-                    this.holidays[this.currentYear].forEach(holiday => {
-                        const status = this.planning[this.currentYear][holiday.id]?.[person] || 'undefined';
-                        const statusText = {
-                            'undefined': '',
-                            'present': '✓'
-                        };
-
-                        html += `
-                            <button class="status-btn status-${status}" 
-                                    onclick="planning.toggleStatus('${person}', '${holiday.id}')"
-                                    title="${holiday.desc} - ${person}">
-                                ${statusText[status]}
-                            </button>
-                        `;
-                    });
-
-                    html += `</div>`;
-                });
-
-                container.innerHTML = html;
-            }
-
-            showToast(message) {
-                const toast = document.getElementById('toast');
-                toast.textContent = message;
-                toast.style.display = 'block';
-                
-                setTimeout(() => {
-                    toast.style.display = 'none';
-                }, 3000);
-            }
-        }
-
-        // Initialisation
-        const planning = new AstreintesPlanningPC();
-        window.planning = planning;
-
-        // Fonctions globales
-        function switchYear(year) {
-            planning.switchYear(year);
-        }
-        function openAddPersonModal() {
-            document.getElementById('addPersonModal').style.display = 'block';
-            setTimeout(() => {
-                document.getElementById('personName').focus();
-            }, 100);
-        }
-
-        function closeModal() {
-            document.getElementById('addPersonModal').style.display = 'none';
-            document.getElementById('personName').value = '';
-        }
-
-        function confirmAddPerson() {
-            const name = document.getElementById('personName').value.trim();
-            if (name) {
-                if (planning.addPerson(name)) {
-                    closeModal();
-                    planning.showToast(`✓ ${name} ajouté(e)`);
                 } else {
-                    planning.showToast('❌ Cette personne existe déjà');
+                    portfolioData[year] = parsed[year];
                 }
-            } else {
-                planning.showToast('⚠️ Veuillez entrer un nom');
-            }
-        }
+            });
+        } catch(e) {}
+    }
+    const savedW = localStorage.getItem('withdrawals');
+    if (savedW) try { withdrawals = JSON.parse(savedW); } catch(e) {}
+}
 
-        function confirmRemovePerson(name) {
-            if (confirm(`Supprimer ${name} du planning ?`)) {
-                planning.removePerson(name);
-            }
+// ============================================
+// CALCULS
+// ============================================
+function getLatestMonthData() {
+    // Cherche le dernier mois renseigné toutes années confondues
+    const years = Object.keys(portfolioData).sort().reverse();
+    for (const year of years) {
+        const data = portfolioData[year];
+        for (let i = data.months.length - 1; i >= 0; i--) {
+            const month = data.months[i];
+            const hasData = data.assets.some(a => a.values[month] > 0);
+            if (hasData) return { year, month, data };
         }
+    }
+    return null;
+}
 
-        // Gestion des événements
-        document.getElementById('personName').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                confirmAddPerson();
+function getChartData() {
+    const labels = [], values = [];
+    Object.keys(portfolioData).sort().forEach(year => {
+        const data = portfolioData[year];
+        data.months.forEach(month => {
+            const total = data.assets.reduce((s, a) => s + (a.values[month] || 0), 0);
+            if (total > 0) {
+                labels.push(month.substring(0, 3) + " '" + year.substring(2));
+                values.push(total);
             }
         });
+    });
+    return { labels, values };
+}
 
-        // Fermer le modal en cliquant à l'extérieur
-        document.getElementById('addPersonModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
+function getYearsWithData() {
+    return Object.keys(portfolioData).sort().filter(year => {
+        const data = portfolioData[year];
+        return data.months.some(m => data.assets.some(a => a.values[m] > 0));
+    });
+}
+
+function getRoiForYear(year) {
+    const data = portfolioData[year];
+    let lastMonth = null;
+    for (let i = data.months.length - 1; i >= 0; i--) {
+        if (data.assets.some(a => a.values[data.months[i]] > 0)) {
+            lastMonth = data.months[i]; break;
+        }
+    }
+    if (!lastMonth) return [];
+
+    return data.assets.map(asset => {
+        const val = asset.values[lastMonth] || 0;
+        const w = getWithdrawal(year, asset.name, lastMonth);
+        const adjusted = val + w;
+        const roi = asset.investissement > 0 ? ((adjusted - asset.investissement) / asset.investissement) * 100 : 0;
+        return { name: asset.name, color: asset.color, roi, val, hasData: val > 0 || w > 0 };
+    }).filter(a => a.hasData).sort((a, b) => b.roi - a.roi);
+}
+
+// ============================================
+// RENDER
+// ============================================
+function renderHero() {
+    const latest = getLatestMonthData();
+    if (!latest) {
+        document.getElementById('heroValue').textContent = '— €';
+        document.getElementById('kpiInvested').textContent = '— €';
+        document.getElementById('kpiGain').textContent = '— €';
+        return;
+    }
+
+    const { year, month, data } = latest;
+    const totalVal = data.assets.reduce((s, a) => s + (a.values[month] || 0), 0);
+
+    // Investissement depuis l'année la plus récente
+    const latestYear = Object.keys(portfolioData).sort().reverse()[0];
+    const totalInvested = portfolioData[latestYear].assets.reduce((s, a) => s + a.investissement, 0);
+    const gain = totalVal - totalInvested;
+    const pct = totalInvested > 0 ? (gain / totalInvested) * 100 : 0;
+
+    document.getElementById('heroValue').textContent = fmt(totalVal);
+    document.getElementById('kpiInvested').textContent = fmt(totalInvested);
+    document.getElementById('kpiGain').style.color = gain >= 0 ? 'var(--green)' : 'var(--red)';
+    document.getElementById('kpiGain').textContent = (gain >= 0 ? '+' : '') + fmt(gain).replace(' €','') + ' €';
+
+    const badge = document.getElementById('heroBadge');
+    badge.textContent = fmtPct(pct) + ' vs initial';
+    badge.className = 'hero-badge' + (pct < 0 ? ' neg' : '');
+}
+
+function renderChart() {
+    const { labels, values } = getChartData();
+    const ctx = document.getElementById('totalChart');
+    if (totalChart) totalChart.destroy();
+
+    if (values.length === 0) return;
+
+    totalChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                data: values,
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16,185,129,0.12)',
+                borderWidth: 2.5,
+                tension: 0.4,
+                fill: true,
+                pointRadius: values.length < 8 ? 4 : 2,
+                pointBackgroundColor: '#10b981',
+                pointBorderColor: '#0f172a',
+                pointBorderWidth: 2,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1e293b',
+                    titleColor: '#f1f5f9',
+                    bodyColor: '#94a3b8',
+                    borderColor: '#334155',
+                    borderWidth: 1,
+                    padding: 10,
+                    displayColors: false,
+                    callbacks: {
+                        label: ctx => '💰 ' + fmt(ctx.parsed.y),
+                        afterLabel: ctx => {
+                            const invested = portfolioData[Object.keys(portfolioData).sort().reverse()[0]].assets.reduce((s,a) => s + a.investissement, 0);
+                            const roi = invested > 0 ? ((ctx.parsed.y - invested) / invested * 100) : 0;
+                            return '🎯 ROI: ' + fmtPct(roi);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    ticks: { color: '#64748b', font: { size: 10 }, callback: v => (v/1000).toFixed(0) + 'k€' },
+                    grid: { color: '#1e293b' }
+                },
+                x: {
+                    ticks: { color: '#64748b', font: { size: 9 }, maxTicksLimit: 6 },
+                    grid: { display: false }
+                }
             }
-        });
+        }
+    });
+}
 
-        console.log('🚀 Planning Astreintes PC initialisé');
-    </script>
+function renderTabs() {
+    const years = getYearsWithData();
+    const tabs = document.getElementById('yearTabs');
+    tabs.innerHTML = '';
+
+    if (years.length === 0) return;
+    if (!activeYear || !years.includes(activeYear)) activeYear = years[years.length - 1];
+
+    years.forEach(y => {
+        const t = document.createElement('div');
+        t.className = 'tab' + (y === activeYear ? ' active' : '');
+        t.textContent = y;
+        t.onclick = () => { activeYear = y; renderTabs(); renderRoi(); };
+        tabs.appendChild(t);
+    });
+}
+
+function renderRoi() {
+    const container = document.getElementById('roiList');
+    const years = getYearsWithData();
+
+    if (years.length === 0 || !activeYear) {
+        container.innerHTML = '<div class="empty">📭 Aucune donnée<br>Importez votre sauvegarde JSON</div>';
+        return;
+    }
+
+    const items = getRoiForYear(activeYear);
+    if (items.length === 0) {
+        container.innerHTML = '<div class="empty">Pas de données pour ' + activeYear + '</div>';
+        return;
+    }
+
+    const maxAbs = Math.max(...items.map(i => Math.abs(i.roi)), 1);
+    container.innerHTML = items.map(item => {
+        const barW = Math.min((Math.abs(item.roi) / maxAbs) * 100, 100);
+        const col = item.roi >= 0 ? 'var(--green)' : 'var(--red)';
+        return `
+        <div class="roi-item">
+            <div class="roi-dot" style="background:${item.color}"></div>
+            <div class="roi-name">${item.name}</div>
+            <div class="roi-bar-wrap"><div class="roi-bar" style="width:${barW}%;background:${col}"></div></div>
+            <div class="roi-val" style="color:${col}">${fmtPct(item.roi)}</div>
+        </div>`;
+    }).join('');
+}
+
+function renderAll() {
+    renderHero();
+    renderChart();
+    renderTabs();
+    renderRoi();
+}
+
+// ============================================
+// IMPORT / EXPORT
+// ============================================
+function openSheet() { document.getElementById('sheet').classList.add('show'); }
+function closeSheet() { document.getElementById('sheet').classList.remove('show'); }
+function closeSheetOutside(e) { if (e.target === document.getElementById('sheet')) closeSheet(); }
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function importData() {
+    closeSheet();
+    const input = document.createElement('input');
+    input.type = 'file'; input.accept = '.json';
+    input.onchange = e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            try {
+                const imported = JSON.parse(ev.target.result);
+                if (!imported.portfolioData) throw new Error('Format invalide');
+
+                // Remplacer portfolioData
+                Object.keys(portfolioData).forEach(y => delete portfolioData[y]);
+                Object.assign(portfolioData, imported.portfolioData);
+
+                if (imported.withdrawals) withdrawals = imported.withdrawals;
+
+                localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
+                localStorage.setItem('withdrawals', JSON.stringify(withdrawals));
+
+                activeYear = null;
+                renderAll();
+                showToast('✅ Import réussi !');
+            } catch(err) {
+                showToast('❌ Fichier invalide');
+            }
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
+function exportData() {
+    closeSheet();
+    const data = JSON.stringify({ portfolioData, withdrawals, version: '1.2', exportDate: new Date().toISOString() }, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'InvestTrack_' + new Date().toISOString().split('T')[0] + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('📤 Export téléchargé');
+}
+
+// ============================================
+// INIT
+// ============================================
+loadData();
+renderAll();
+</script>
 </body>
 </html>
